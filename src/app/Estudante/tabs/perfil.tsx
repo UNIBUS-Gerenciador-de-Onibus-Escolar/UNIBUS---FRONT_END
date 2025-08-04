@@ -1,19 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  FlatList,
-  Alert,
-} from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function Perfil() {
-  // Estado para dados do usuário
   const [usuario, setUsuario] = useState({
     nome: 'Perfil teste',
     email: 'teste.unibus@email.com',
@@ -26,7 +16,6 @@ export default function Perfil() {
     ],
   });
 
-  // Permissão para galeria: boolean ou null (indefinido)
   const [hasGalleryPermission, setHasGalleryPermission] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -68,7 +57,7 @@ export default function Perfil() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <TouchableOpacity onPress={escolherFoto} style={styles.photoContainer}>
         {usuario.foto ? (
           <Image source={{ uri: usuario.foto }} style={styles.photo} />
@@ -93,26 +82,21 @@ export default function Perfil() {
         <Text style={styles.infoText}>{usuario.tipo}</Text>
       </View>
 
-      <View style={styles.onibusSection}>
-        <Text style={styles.sectionTitle}>Ônibus cadastrados</Text>
-        {usuario.onibus.length === 0 ? (
-          <Text style={{ color: '#999', fontStyle: 'italic' }}>Nenhum ônibus cadastrado.</Text>
-        ) : (
-          <FlatList
-            data={usuario.onibus}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.onibusItem}>
-                <FontAwesome5 name="bus" size={24} color="#f2c200" />
-                <View style={{ marginLeft: 12 }}>
-                  <Text style={styles.onibusText}>Placa: {item.placa}</Text>
-                  <Text style={styles.onibusText}>Modelo: {item.modelo}</Text>
-                </View>
-              </View>
-            )}
-          />
-        )}
-      </View>
+      <Text style={styles.sectionTitle}>Ônibus cadastrados</Text>
+
+      {usuario.onibus.length === 0 ? (
+        <Text style={{ color: '#999', fontStyle: 'italic' }}>Nenhum ônibus cadastrado.</Text>
+      ) : (
+        usuario.onibus.map((item) => (
+          <View key={item.id} style={styles.onibusItem}>
+            <FontAwesome5 name="bus" size={24} color="#f2c200" />
+            <View style={{ marginLeft: 12 }}>
+              <Text style={styles.onibusText}>Placa: {item.placa}</Text>
+              <Text style={styles.onibusText}>Modelo: {item.modelo}</Text>
+            </View>
+          </View>
+        ))
+      )}
 
       <TouchableOpacity style={styles.button} onPress={handleEditarPerfil}>
         <Ionicons name="create-outline" size={20} color="#fff" />
@@ -126,6 +110,7 @@ export default function Perfil() {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

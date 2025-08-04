@@ -8,10 +8,10 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 export default function Estudante() {
-  const navigation = useNavigation<any>();
+ 
 
   const [nome, setNome] = useState('');
   const [curso, setCurso] = useState('');
@@ -67,7 +67,7 @@ export default function Estudante() {
     setConfirmaSenha('');
 
     // Navegar para telaInicial
-    navigation.navigate('telaInicial');
+    router.push('/Estudante/tabs/telaInicial')
   };
 
   return (

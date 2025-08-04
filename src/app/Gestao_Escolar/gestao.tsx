@@ -30,7 +30,7 @@ export default function PINGestao() {
 
     if (pin === pinCorreto) {
       Alert.alert('Acesso liberado');
-      router.push('/painelAdm'); // ✅ Alterado aqui
+      router.push('/Gestao_Escolar/painelAdm'); // ✅ Alterado aqui
     } else {
       Alert.alert('PIN incorreto');
       setPin('');

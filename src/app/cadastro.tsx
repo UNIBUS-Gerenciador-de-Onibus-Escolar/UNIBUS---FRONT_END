@@ -24,7 +24,7 @@ export default function Index() {
         {/* Botão Estudante */}
         <TouchableOpacity
           style={styles.border}
-          onPress={() => router.push('/estudante')}
+          onPress={() => router.push('/Estudante/estudante')}
         >
           <Image
             style={styles.icon}
@@ -36,7 +36,7 @@ export default function Index() {
         {/* Botão Motorista */}
         <TouchableOpacity
           style={styles.border}
-          onPress={() => router.push('/motorista')}
+          onPress={() => router.push('/Motorista/motorista')}
         >
           <Image
             style={styles.icon}
@@ -48,7 +48,7 @@ export default function Index() {
         {/* Botão Gestão Escolar */}
         <TouchableOpacity 
           style={styles.border}
-          onPress={() => router.push('/gestao')}
+          onPress={() => router.push('/Gestao_Escolar/gestao')}
         >
           <Image
             style={styles.icon}
