@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "UNIBUS",
+    "slug": "UNIBUS",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/Logo_App.png",
+    "scheme": "unibus",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/Logo_App.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "SUA_API_KEY_GOOGLE_AQUI"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Precisamos da sua localização para mostrar o trajeto do transporte escolar.",
+        "NSUserTrackingUsageDescription": "Usamos sua localização para exibir informações sobre sua rota.",
+        "UIBackgroundModes": ["location", "fetch"],
+        "UIBackgroundTaskInterval": 1800
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "SUA_API_KEY_GOOGLE_AQUI"
+        }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
