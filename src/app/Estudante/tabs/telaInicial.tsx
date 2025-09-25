@@ -15,6 +15,7 @@ import {
 import { Ionicons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from '../../../BackEnd/IPconfig';
 
 const { width } = Dimensions.get("window");
 const scale = width / 375;
@@ -72,11 +73,11 @@ export default function MainRoutesScreen() {
       if (!estudante) return;
       try {
         // Buscar todas as rotas
-        const resRoutes = await fetch("http://192.168.0.4:5000/api/rotas/listar");
+        const resRoutes = await fetch(`${API_URL}/api/rotas/listar`);
         const data = await resRoutes.json();
 
         // Buscar rotas em que o estudante já está inscrito
-        const resInscritos = await fetch(`http://192.168.0.4:5000/inscricaoEstudante/listar_rotas_estudante/${estudante.id}`);
+        const resInscritos = await fetch(`${API_URL}/inscricaoEstudante/listar_rotas_estudante/${estudante.id}`);
         const inscritosData = await resInscritos.json();
         const inscritosIds = inscritosData.map((r: any) => r.id);
 
@@ -139,7 +140,7 @@ export default function MainRoutesScreen() {
 
     try {
       if (!route.subscribed) {
-        const response = await fetch("http://192.168.0.4:5000/inscricaoEstudante/inscrever", {
+        const response = await fetch(`${API_URL}/inscricaoEstudante/inscrever`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ estudante_id: estudante.id, rota_id: routeId }),
@@ -150,7 +151,7 @@ export default function MainRoutesScreen() {
           Alert.alert("Erro", data.erro || "Não foi possível inscrever-se.");
         }
       } else {
-        const response = await fetch("http://192.168.0.4:5000/inscricaoEstudante/remover", {
+        const response = await fetch(`${API_URL}/inscricaoEstudante/remover`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ estudante_id: estudante.id, rota_id: routeId }),
@@ -227,78 +228,85 @@ export default function MainRoutesScreen() {
 
         {/* Lista de rotas */}
         <FlatList
-          data={filteredRoutes}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: normalize(40) }}
-          renderItem={({ item }) => (
-            <View style={styles.routeCard}>
-              <View style={styles.routeHeader}>
-                <View style={styles.routeLeft}>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: normalize(8) }}>
-                      <MaterialCommunityIcons name="bus-school" size={normalize(22)}  />
-                      <View>
-                        <Text style={styles.routeName}>{item.routeName}</Text>
-                        <Text style={styles.metaText}>
-                          <Ionicons name="person-outline" size={normalize(12)} /> {item.driver}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              </View>
+  data={filteredRoutes}
+  keyExtractor={item => item.id}
+  showsVerticalScrollIndicator={false}
+  contentContainerStyle={{ paddingBottom: normalize(40) }}
+  renderItem={({ item }) => (
+    <View style={[styles.routeCard, { borderColor: '#FFD600', borderWidth: 2 }]}>
+      {/* Header do card */}
+      <View style={styles.routeHeader}>
+        <View style={styles.routeLeft}>
+          <View style={styles.routeIconWrap}>
+            <MaterialCommunityIcons name="bus-school" size={normalize(22)} color="#000" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.routeName}>{item.routeName}</Text>
+            <Text style={styles.metaText}>
+              <Ionicons name="person-outline" size={normalize(12)} /> {item.driver}
+            </Text>
+          </View>
+        </View>
+      </View>
 
-              {/* Horários */}
-              <View style={styles.infoGrid}>
-                <View style={[styles.infoBoxBlue]}>
-                  <Text style={styles.infoTitle}>Ida</Text>
-                  <Text style={styles.infoSmall}>Saída: {item.departureTime}</Text>
-                  <Text style={styles.infoSmall}>Chegada: {item.arrivalTime}</Text>
-                </View>
-                <View style={[styles.infoBoxGreen]}>
-                  <Text style={styles.infoTitle}>Volta</Text>
-                  <Text style={styles.infoSmall}>Saída: {item.returnDeparture}</Text>
-                  <Text style={styles.infoSmall}>Chegada: {item.returnArrival}</Text>
-                </View>
-              </View>
+      {/* Ida e Volta */}
+      <View style={styles.infoGrid}>
+        <View style={[styles.infoBoxBlue, { backgroundColor: '#f7f7f7ff' }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: normalize(6) }}>
+            <FontAwesome5 name="school" size={normalize(16)} color="#2563eb" />
+            <Text style={styles.infoTitle}>Ida</Text>
+          </View>
+          <Text style={styles.infoSmall}>Saída: {item.departureTime}</Text>
+          <Text style={styles.infoSmall}>Chegada: {item.arrivalTime}</Text>
+        </View>
 
-              {/* Ações */}
-              <View style={styles.actionsRow}>
-                <TouchableOpacity onPress={() => handleRoutePress(item.id)} style={styles.grayButton}>
-                  <Ionicons name="location-outline" size={normalize(14)} color="#111"  />
-                  <Text style={styles.grayButtonText}>Ver Detalhes</Text>
-                </TouchableOpacity>
+        <View style={[styles.infoBoxGreen, { backgroundColor: '#f7f7f7ff' }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: normalize(6) }}>
+            <Ionicons name="home-outline" size={normalize(16)} color="#16a34a" />
+            <Text style={styles.infoTitle}>Volta</Text>
+          </View>
+          <Text style={styles.infoSmall}>Saída: {item.returnDeparture}</Text>
+          <Text style={styles.infoSmall}>Chegada: {item.returnArrival}</Text>
+        </View>
+      </View>
 
-                {!item.subscribed && (
-                  <TouchableOpacity onPress={() => handleSubscribeRoute(item.id)} style={styles.primaryButton}>
-                    <Ionicons name="add-circle-outline" size={normalize(16)} color="#111" />
-                    <Text style={styles.primaryButtonText}>Inscrever-se</Text>
-                  </TouchableOpacity>
-                )}
+      {/* Botões */}
+      <View style={styles.actionsRow}>
+        <TouchableOpacity onPress={() => handleRoutePress(item.id)} style={styles.grayButton}>
+          <Ionicons name="location-outline" size={normalize(14)} color="#111" />
+          <Text style={styles.grayButtonText}>Ver Detalhes</Text>
+        </TouchableOpacity>
 
-                {item.subscribed && (
-                  <TouchableOpacity onPress={() => handleSubscribeRoute(item.id)} style={styles.disabledButton}>
-                    <Ionicons name="checkmark-circle" size={normalize(16)} color="#111" />
-                    <Text style={styles.disabledButtonText}>Inscrito</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          )}
-          ListFooterComponent={() => (
-            <View style={styles.requestCard}>
-              <Text style={styles.requestTitle}>Não encontrou sua rota?</Text>
-              <Text style={styles.requestSubtitle}>
-                Solicite uma nova rota para sua região. Com {pendingRequests} solicitações pendentes, há grande chance de aprovação!
-              </Text>
-              <TouchableOpacity onPress={handleRequestRoute} style={styles.requestButton}>
-                <Ionicons name="add" size={normalize(18)} color="#FFD600" />
-                <Text style={styles.requestButtonText}>Solicitar Nova Rota</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        />
+        {!item.subscribed && (
+          <TouchableOpacity onPress={() => handleSubscribeRoute(item.id)} style={styles.primaryButton}>
+            <Ionicons name="add-circle-outline" size={normalize(16)} color="#111" />
+            <Text style={styles.primaryButtonText}>Inscrever-se</Text>
+          </TouchableOpacity>
+        )}
+
+        {item.subscribed && (
+          <TouchableOpacity style={styles.disabledButton}>
+            <Ionicons name="checkmark-circle" size={normalize(16)} color="#777" />
+            <Text style={styles.disabledButtonText}>Inscrito</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  )}
+  ListFooterComponent={() => (
+    <View style={styles.requestCard}>
+      <Text style={styles.requestTitle}>Não encontrou sua rota?</Text>
+      <Text style={styles.requestSubtitle}>
+        Solicite uma nova rota para sua região. Com {pendingRequests} solicitações pendentes, há grande chance de aprovação!
+      </Text>
+      <TouchableOpacity onPress={handleRequestRoute} style={styles.requestButton}>
+        <Ionicons name="add" size={normalize(18)} color="#FFD600" />
+        <Text style={styles.requestButtonText}>Solicitar Nova Rota</Text>
+      </TouchableOpacity>
+    </View>
+  )}
+/>
+
       </View>
     </View>
   );
@@ -343,7 +351,12 @@ const styles = StyleSheet.create({
   primaryButtonText: { fontSize: normalize(13), fontWeight: "700", color: "#111" },
   disabledButton: { flexDirection: "row", alignItems: "center", gap: normalize(6), backgroundColor: "#f3f4f6", paddingVertical: normalize(8), paddingHorizontal: normalize(14), borderRadius: normalize(12) },
   disabledButtonText: { fontSize: normalize(13), fontWeight: "600", color: "#111" },
-  
+  routeIconWrap: {
+  backgroundColor: '#FFF7CC',
+  padding: normalize(10),
+  borderRadius: normalize(12),
+},
+
 
   // Card de solicitação
   requestCard: { backgroundColor: "#fff", borderRadius: normalize(18), padding: normalize(16), borderWidth: 1, borderColor: "#eee", marginTop: normalize(25), elevation: 2 },

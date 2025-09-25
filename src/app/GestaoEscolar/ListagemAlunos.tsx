@@ -67,7 +67,7 @@ export default function ListagemAlunos() {
       const path = FileSystem.cacheDirectory + "alunos.xlsx";
 
       await FileSystem.writeAsStringAsync(path, wbout, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: "base64",
       });
 
       await Sharing.shareAsync(path);

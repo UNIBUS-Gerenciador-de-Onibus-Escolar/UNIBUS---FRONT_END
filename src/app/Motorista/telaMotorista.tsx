@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import { API_URL } from '../../BackEnd/IPconfig';
 
 const MotoristaCadastro = () => {
   const router = useRouter();
@@ -29,7 +30,7 @@ const MotoristaCadastro = () => {
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const BACKEND_URL = "http://192.168.0.4:5000/motoristas/cadastrar";
+  const BACKEND_URL = `${API_URL}/api/motoristas/cadastrar`;
 
   // Selecionar foto
   const handleSelecionarFoto = async () => {
@@ -103,7 +104,7 @@ const MotoristaCadastro = () => {
       if (!response.ok) throw new Error(data.erro || "Falha no cadastro");
 
       Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
-      router.replace("/Motorista/telaMotorista"); // vai para telaMotorista.tsx
+      router.replace("./telaMotorista"); // vai para telaMotorista.tsx
     } catch (error: any) {
       Alert.alert("Erro", error.message || "Falha na conexão.");
     } finally {

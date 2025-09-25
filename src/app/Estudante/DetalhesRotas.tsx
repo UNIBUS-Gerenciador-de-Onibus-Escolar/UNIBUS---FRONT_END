@@ -12,7 +12,18 @@ import MapView, { Marker, Polyline, Region } from "react-native-maps";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { X, Route, Clock, MapPin, Home, School, User, Phone, Car } from "lucide-react-native";
+import {
+  X,
+  Route,
+  Clock,
+  MapPin,
+  Home,
+  School,
+  User,
+  Phone,
+  Car,
+} from "lucide-react-native";
+import { API_URL } from "../../BackEnd/IPconfig";
 
 type Stop = {
   id: number;
@@ -59,44 +70,56 @@ const DetalhesRotas = () => {
         if (!estudante) return;
 
         const res = await fetch(
-          `http://192.168.0.101:5000/api/rotas/detalhes/${routeId}/${estudante.id}`
+          `${API_URL}/api/rotas/detalhes/${routeId}/${estudante.id}`
         );
         if (!res.ok) throw new Error("Rota não encontrada");
         const data: RouteData = await res.json();
 
-        // Cria stops com base nos pontos recebidos do backend
-        let stops: Stop[] = data.pontos_parada.map((ponto, idx) => ({
-          id: idx + 1,
-          name: ponto.name,
-          type: idx === 0 ? "origin" : "stop",
-          latitude: ponto.latitude,
-          longitude: ponto.longitude,
-        }));
+        // Usa apenas coordenadas vindas do backend
+      let stops: Stop[] = data.pontos_parada
+  // Filtra para não incluir o ponto com o mesmo nome da escola
+  .filter(ponto => ponto.name !== data.destino_escola?.nome)
+  .map((ponto, idx) => ({
+    id: idx + 1,
+    name: ponto.name,
+    type: "stop",
+    latitude: ponto.latitude,
+    longitude: ponto.longitude,
+  }));
 
-        // Adiciona o destino final (escola) somente se ainda não estiver no último ponto
+
+        if (stops.length > 0) {
+          stops[0].type = "origin"; // Primeiro ponto
+        }
+
         if (data.destino_escola) {
-          const ultimoStop = stops[stops.length - 1];
-          if (!ultimoStop || ultimoStop.name !== data.destino_escola.nome) {
-            stops.push({
-              id: stops.length + 1,
-              name: data.destino_escola.nome,
-              type: "destination",
-              latitude: data.destino_escola.latitude,
-              longitude: data.destino_escola.longitude,
-            });
-          } else {
-            stops[stops.length - 1].type = "destination";
-          }
+          stops.push({
+            id: stops.length + 1,
+            name: data.destino_escola.nome,
+            type: "destination",
+            latitude: data.destino_escola.latitude,
+            longitude: data.destino_escola.longitude,
+          });
+        } else if (stops.length > 1) {
+          stops[stops.length - 1].type = "destination";
         }
 
         setRouteData({ ...data, pontos_parada: stops });
 
+        // Ajusta região do mapa para englobar todos os pontos
         if (stops.length > 0) {
+          const lats = stops.map((s) => s.latitude);
+          const lngs = stops.map((s) => s.longitude);
+          const minLat = Math.min(...lats);
+          const maxLat = Math.max(...lats);
+          const minLng = Math.min(...lngs);
+          const maxLng = Math.max(...lngs);
+
           setRegion({
-            latitude: stops[0].latitude,
-            longitude: stops[0].longitude,
-            latitudeDelta: 0.03,
-            longitudeDelta: 0.03,
+            latitude: (minLat + maxLat) / 2,
+            longitude: (minLng + maxLng) / 2,
+            latitudeDelta: (maxLat - minLat) * 1.5 || 0.03,
+            longitudeDelta: (maxLng - minLng) * 1.5 || 0.03,
           });
         }
       } catch (err) {
@@ -144,7 +167,11 @@ const DetalhesRotas = () => {
         <View style={styles.rowCenter}>
           <Route size={16} color="black" style={{ marginRight: 4 }} />
           <Text style={styles.smallText}>{routeData.turno}</Text>
-          <Clock size={16} color="black" style={{ marginLeft: 10, marginRight: 4 }} />
+          <Clock
+            size={16}
+            color="black"
+            style={{ marginLeft: 10, marginRight: 4 }}
+          />
           <Text style={styles.smallText}>
             {routeData.horario_saida_casa} - {routeData.horario_chegada_casa}
           </Text>
@@ -152,13 +179,28 @@ const DetalhesRotas = () => {
       </LinearGradient>
 
       {/* Mapa */}
-      <View style={{ height: 250, marginHorizontal: 16, marginBottom: 16, borderRadius: 20, overflow: "hidden" }}>
+      <View
+        style={{
+          height: 250,
+          marginHorizontal: 16,
+          marginBottom: 16,
+          borderRadius: 20,
+          overflow: "hidden",
+        }}
+      >
         <MapView style={{ flex: 1 }} region={region} showsUserLocation>
           {routeData.pontos_parada.map((stop) => (
             <Marker
               key={stop.id}
               coordinate={{ latitude: stop.latitude, longitude: stop.longitude }}
               title={stop.name}
+              pinColor={
+                stop.type === "origin"
+                  ? "green"
+                  : stop.type === "destination"
+                  ? "red"
+                  : "orange"
+              }
             />
           ))}
           {routeData.pontos_parada.length > 1 && (
@@ -251,29 +293,25 @@ const DetalhesRotas = () => {
 export default DetalhesRotas;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "white" },
+  container: { flex: 1, backgroundColor: "#fff" },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: {
-    padding: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
+  header: { padding: 16, paddingTop: 40,  marginBottom:50, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 ,},
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   statusRow: { flexDirection: "row", alignItems: "center" },
-  statusDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "green", marginRight: 6 },
-  statusText: { color: "black", fontWeight: "600" },
-  routeName: { fontSize: 24, fontWeight: "bold", color: "black", textAlign: "center", marginVertical: 10 },
-  rowCenter: { flexDirection: "row", alignItems: "center" },
+  statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "green", marginRight: 6 },
+  statusText: { fontSize: 14, color: "black" },
+  routeName: { fontSize: 20, fontWeight: "bold", marginTop: 6, color: "black" },
+  rowCenter: { flexDirection: "row", alignItems: "center", marginTop: 6 },
   smallText: { fontSize: 14, color: "black" },
-  card: { margin: 16, borderRadius: 20, backgroundColor: "white", elevation: 3 },
-  cardHeader: { flexDirection: "row", alignItems: "center", padding: 12, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
-  cardTitle: { fontSize: 16, fontWeight: "bold", color: "black", marginLeft: 8 },
-  cardBody: { padding: 16 },
-  stopItem: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
-  stopIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "black", justifyContent: "center", alignItems: "center" },
-  stopIndex: { color: "white", fontWeight: "bold" },
-  stopName: { fontSize: 16, fontWeight: "600", color: "black" },
-  stopBadge: { backgroundColor: "#FFD600", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: "600", color: "black" },
+  card: { margin: 16, borderRadius: 16, backgroundColor: "#fafafa", overflow: "hidden", elevation: 3 },
+  cardHeader: { flexDirection: "row", alignItems: "center", padding: 10 },
+  cardTitle: { fontSize: 16, fontWeight: "bold", marginLeft: 6, color: "black" },
+  cardBody: { padding: 12 },
+  stopItem: { flexDirection: "row", alignItems: "center", marginVertical: 6 },
+  stopIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#FFB300", justifyContent: "center", alignItems: "center", marginRight: 10 },
+  stopIndex: { fontSize: 14, fontWeight: "bold", color: "white" },
+  stopName: { fontSize: 15, color: "black" },
+  stopBadge: { fontSize: 12, color: "gray", marginLeft: 6 },
   stopTime: { fontSize: 14, color: "black" },
   observacoesText: { fontSize: 14, color: "black" },
 });

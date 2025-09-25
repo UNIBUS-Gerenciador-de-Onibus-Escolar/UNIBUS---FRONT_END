@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { API_URL } from '../BackEnd/IPconfig';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await fetch('http://192.168.0.4:5000/api/estudantes/login', {
+      const response = await fetch(`${API_URL}/api/estudantes/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, senha }),
@@ -93,7 +94,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFBEF', // fundo bege suave, igual ao protótipo
+    backgroundColor: '#ffffffff', // fundo bege suave, igual ao protótipo
   },
   keyboardView: {
     flex: 1,

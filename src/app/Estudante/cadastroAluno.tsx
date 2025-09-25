@@ -17,6 +17,7 @@ import {
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { API_URL } from '../../BackEnd/IPconfig';
 
 export default function Estudante() {
   const [nome, setNome] = useState('');
@@ -123,7 +124,7 @@ export default function Estudante() {
 
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.0.4:5000/api/estudantes/cadastro', {
+      const response = await fetch(`${API_URL}/api/estudantes/cadastro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados),
