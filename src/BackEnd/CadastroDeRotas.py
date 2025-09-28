@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 import mysql.connector
-import uuid
 import traceback
 import json
 
@@ -13,7 +12,7 @@ def conectar():
         host="localhost",
         user="root",
         password="neto2007",
-        database="TccUnibus"
+        database="UNIBUS"
     )
 
 # =====================================================
@@ -27,24 +26,20 @@ def cadastrar_rota():
         conn = conectar()
         cursor = conn.cursor()
 
-        # ID único da rota
-        id_rota = str(uuid.uuid4())
-
         # PONTOS DE PARADA: lista de objetos {name, latitude, longitude, horario}
         pontos = data.get("pontos_parada", [])
         pontos_serializados = json.dumps(pontos)  # Salva como JSON no banco
 
-        # Inserindo a rota no banco
+        # Inserindo a rota no banco (id é auto incremento, não passamos mais)
         cursor.execute("""
             INSERT INTO rotas (
-                id, nome_rota, numero_onibus, placa_veiculo,
+                nome_rota, numero_onibus, placa_veiculo,
                 turno, motorista_nome, motorista_telefone,
                 horario_saida_casa, horario_chegada_escola,
                 horario_saida_escola, horario_chegada_casa,
                 pontos_parada, observacoes
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            id_rota,
             data.get("nome_rota"),
             data.get("numero_onibus"),
             data.get("placa_veiculo"),
@@ -60,6 +55,8 @@ def cadastrar_rota():
         ))
 
         conn.commit()
+        # Pega o id gerado automaticamente
+        id_rota = cursor.lastrowid
 
         return jsonify({"mensagem": "Rota cadastrada com sucesso!", "id_rota": id_rota}), 201
 

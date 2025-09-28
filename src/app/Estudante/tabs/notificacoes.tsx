@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react"; 
 import { Ionicons } from '@expo/vector-icons';
 import {
   View,
@@ -7,83 +7,34 @@ import {
   FlatList,
   StyleSheet,
   StatusBar,
-  Platform
+  Platform,
+  Alert
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../../BackEnd/IPconfig';
 
 /* -------------------------
    Tipo Notification
 ------------------------- */
 type Notification = {
-  id: string;
-  title: string;
-  description: string;
-  priority: keyof typeof priorityColors;
-  recipient: string;
-  sender: string;
-  type: string;
-  date: string;
-  read: boolean;
+  id: number;
+  titulo: string;
+  mensagem: string;
+  prioridade: "Urgente" | "Alta" | "Média" | "Baixa";
+  destinatario_tipo: string;
+  remetente_tipo: string;
+  tipo: string;
+  created_at: string;
+  lida: boolean;
 };
-
-/* -------------------------
-   Dados iniciais
-------------------------- */
-const initialNotifications: Notification[] = [
-  {
-    id: "1",
-    title: "Período de Provas - Horários Especiais",
-    description:
-      "Atenção alunos: durante o período de provas os horários serão alterados conforme calendário escolar.",
-    priority: "Alta",
-    recipient: "Estudantes",
-    sender: "Gestão Escolar",
-    type: "Evento",
-    date: "2025-06-01 08:30",
-    read: false,
-  },
-  {
-    id: "2",
-    title: "Atraso devido ao trânsito",
-    description:
-      "O motorista da Rota de Peladas encontra-se com atraso estimado em 15 minutos devido ao trânsito.",
-    priority: "Média",
-    recipient: "Estudantes",
-    sender: "Motorista Rota Peladas",
-    type: "Aviso",
-    date: "2025-06-02 07:15",
-    read: false,
-  },
-  {
-    id: "3",
-    title: "Reunião de Pais",
-    description:
-      "Reunião de pais será na próxima quarta-feira, o ônibus do Xicuru chegará às 13:30",
-    priority: "Alta",
-    recipient: "Estudantes",
-    sender: "Gestão Escolar",
-    type: "Evento",
-    date: "2025-05-28 19:00",
-    read: true,
-  },
-  {
-    id: "4",
-    title: "Troca de Veículo - Rota 301",
-    description: "O veículo da Rota 301 será substituído por manutenção.",
-    priority: "Alta",
-    recipient: "Estudantes",
-    sender: "Gestão de Transporte",
-    type: "Aviso",
-    date: "2025-06-03 06:50",
-    read: false,
-  },
-];
 
 /* -------------------------
    Mapeamento de cores
 ------------------------- */
 const priorityColors = {
+  Urgente: "#FF0000",
   Alta: "#FF5B5B",
   Média: "#FFB65B",
   Baixa: "#4CAF50",
@@ -93,7 +44,6 @@ const priorityColors = {
    Componente: Header
 ------------------------- */
 type HeaderProps = { unreadCount: number };
-
 const Header: React.FC<HeaderProps> = ({ unreadCount }) => (
   <SafeAreaView edges={['top']} style={{ backgroundColor: "#FFD600" }}>
     <View
@@ -123,21 +73,61 @@ type FiltersProps = {
 };
 
 const Filters: React.FC<FiltersProps> = ({ selectedFilter, setSelectedFilter }) => {
-  const filters = ["Todos", "Alta", "Eventos", "Motoristas", "Estudantes"];
+  const mainFilters = ["Todos", "Gestão", "Motoristas", "Prioridades"];
+  const priorityFilters = ["Urgente", "Alta", "Média", "Baixa"];
+
+  const [showPrioritySubfilters, setShowPrioritySubfilters] = useState(false);
+  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
+
+  const handleMainFilterPress = (filter: string) => {
+    if (filter === "Prioridades") {
+      setShowPrioritySubfilters(!showPrioritySubfilters);
+    } else {
+      setSelectedFilter(filter);
+      setShowPrioritySubfilters(false);
+      setSelectedPriority(null);
+    }
+  };
+
+  const handlePriorityPress = (priority: string) => {
+    setSelectedFilter(priority);
+    setSelectedPriority(priority);
+    setShowPrioritySubfilters(true); // mantém visível
+  };
+
   return (
-    <View style={styles.filtersContainer}>
-      {filters.map((f) => {
-        const active = selectedFilter === f;
-        return (
-          <TouchableOpacity
-            key={f}
-            style={[styles.filterPill, active && styles.filterPillActive]}
-            onPress={() => setSelectedFilter(f)}
-          >
-            <Text style={[styles.filterText, active && styles.filterTextActive]}>{f}</Text>
-          </TouchableOpacity>
-        );
-      })}
+    <View style={{ alignItems: 'center' }}>
+      <View style={styles.filtersContainer}>
+        {mainFilters.map((f) => {
+          const active = selectedFilter === f && !priorityFilters.includes(f);
+          return (
+            <TouchableOpacity
+              key={f}
+              style={[styles.filterPill, active && styles.filterPillActive]}
+              onPress={() => handleMainFilterPress(f)}
+            >
+              <Text style={[styles.filterText, active && styles.filterTextActive]}>{f}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {showPrioritySubfilters && (
+        <View style={[styles.filtersContainer, { marginTop: 8 }]}>
+          {priorityFilters.map((p) => {
+            const active = selectedPriority === p;
+            return (
+              <TouchableOpacity
+                key={p}
+                style={[styles.filterPill, active && styles.filterPillActive]}
+                onPress={() => handlePriorityPress(p)}
+              >
+                <Text style={[styles.filterText, active && styles.filterTextActive]}>{p}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 };
@@ -145,12 +135,12 @@ const Filters: React.FC<FiltersProps> = ({ selectedFilter, setSelectedFilter }) 
 /* -------------------------
    Componente: NotificationCard
 ------------------------- */
-const NotificationCard: React.FC<{ item: Notification; onConfirm: (id: string) => void }> = ({
+const NotificationCard: React.FC<{ item: Notification; onConfirm: (id: number) => void }> = ({
   item,
   onConfirm,
 }) => {
-  const isRead = !!item.read;
-  const priorityColor = priorityColors[item.priority] || "#999";
+  const isRead = !!item.lida;
+  const priorityColor = priorityColors[item.prioridade] || "#999";
 
   return (
     <View
@@ -161,15 +151,15 @@ const NotificationCard: React.FC<{ item: Notification; onConfirm: (id: string) =
       ]}
     >
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>{item.title}</Text>
+        <Text style={styles.cardTitle}>{item.titulo}</Text>
         {isRead && <Text style={styles.readBadge}>✔ Lido</Text>}
       </View>
 
       <Text style={styles.cardMeta}>
-        Prioridade: <Text style={{ color: priorityColor }}>{item.priority}</Text> • Destinatário: {item.recipient} • Enviado por: {item.sender} • {item.date}
+        Prioridade: <Text style={{ color: priorityColor }}>{item.prioridade}</Text> • Destinatário: {item.destinatario_tipo || "Todos"} • Enviado por: {item.remetente_tipo || "Sistema"} • {new Date(item.created_at).toLocaleString()}
       </Text>
 
-      <Text style={styles.cardDescription}>{item.description}</Text>
+      <Text style={styles.cardDescription}>{item.mensagem}</Text>
 
       <View style={styles.cardFooter}>
         <TouchableOpacity
@@ -193,40 +183,102 @@ const NotificationCard: React.FC<{ item: Notification; onConfirm: (id: string) =
    Tela principal
 ------------------------- */
 export default function NotificationsScreen() {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState("Todos");
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
 
-  const handleConfirmRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  useEffect(() => {
+    const loadUserId = async () => {
+      try {
+        const user = await AsyncStorage.getItem('estudante');
+        if (!user) {
+          console.warn("Nenhum usuário encontrado no AsyncStorage");
+          return;
+        }
+        const parsed = JSON.parse(user);
+        const id = parsed.profile_id || parsed.id;
+        if (!id) return;
+        setUsuarioId(id);
+      } catch (error) {
+        console.error("Erro ao carregar usuário logado", error);
+      }
+    };
+    loadUserId();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.lida).length;
+
+  const fetchNotifications = async () => {
+    if (!usuarioId) return;
+    try {
+      const res = await fetch(`${API_URL}/api/notificacoes/listar/${usuarioId}`);
+      const data = await res.json();
+
+      // Mapeia para Notification, garantindo os campos corretos
+      const mapped = data.map((n: any) => ({
+        id: n.id,
+        titulo: n.titulo,
+        mensagem: n.mensagem,
+        prioridade: n.prioridade,
+        destinatario_tipo: n.destinatario_tipo,
+        remetente_tipo: n.remetente_tipo,
+        tipo: n.tipo,
+        created_at: n.created_at,
+        lida: n.lida,
+      }));
+
+
+      setNotifications(mapped);
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível carregar as notificações.");
+    }
+  };
+
+  const handleConfirmRead = async (id: number) => {
+    try {
+      const res = await fetch(`${API_URL}/api/notificacoes/marcar_lida/${id}`, { method: "PUT" });
+      const json = await res.json();
+      if (json.success) {
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível marcar como lida.");
+    }
   };
 
   const filteredNotifications = useMemo(() => {
     if (filter === "Todos") return notifications;
-    if (filter === "Alta") return notifications.filter((n) => n.priority === "Alta");
-    if (filter === "Eventos") return notifications.filter((n) => n.type === "Evento");
-    if (filter === "Motoristas") return notifications.filter((n) => n.recipient === "Motoristas");
-    if (filter === "Estudantes") return notifications.filter((n) => n.recipient === "Estudantes");
+
+    if (["Urgente", "Alta", "Média", "Baixa"].includes(filter))
+      return notifications.filter(n => n.prioridade === filter);
+
+    if (filter === "Motoristas")
+      return notifications.filter(n => n.remetente_tipo.toLowerCase() === "motoristas");
+
+    if (filter === "Gestão")
+      return notifications.filter(n => n.remetente_tipo.toLowerCase() === "gestão");
+
     return notifications;
   }, [filter, notifications]);
 
-  /* -------------------------
-     Ativa modo imersivo Android com Expo
-  ------------------------- */
   useEffect(() => {
+    if (!usuarioId) return;
+    fetchNotifications();
     if (Platform.OS === 'android') {
       NavigationBar.setVisibilityAsync('hidden');
       NavigationBar.setBehaviorAsync('overlay-swipe');
     }
-  }, []);
+  }, [usuarioId]);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-
       <Header unreadCount={unreadCount} />
 
       <View style={{ flex: 1 }}>
@@ -236,9 +288,9 @@ export default function NotificationsScreen() {
 
         <FlatList
           data={filteredNotifications}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
           renderItem={({ item }) => <NotificationCard item={item} onConfirm={handleConfirmRead} />}
-          contentContainerStyle={{ paddingHorizontal: 14, paddingTop: 8, paddingBottom: 0 }} // sem padding no rodapé
+          contentContainerStyle={{ paddingHorizontal: 14, paddingTop: 8, paddingBottom: 0 }}
           showsVerticalScrollIndicator={false}
         />
       </View>
@@ -266,12 +318,12 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 14, color: "#666", marginTop: 2 },
   headerRightPlaceholder: { width: 36, alignItems: "center" },
 
-  section: { paddingTop: 20, paddingBottom: 15,},
+  section: { paddingTop: 20, paddingBottom: 15 },
 
   filtersContainer: {
     flexDirection: "row",
     flexWrap: "nowrap",
-    justifyContent: "center", // centraliza os filtros
+    justifyContent: "center",
     alignItems: "center",
   },
   filterPill: {

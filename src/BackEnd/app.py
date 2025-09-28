@@ -6,6 +6,8 @@ from CadastroEstudante import estudantes_bp
 from CadastroDeRotas import rotas_bp
 from InscricaoEstudante import inscricoes_bp
 from CadastroMotorista import motoristas_bp  # módulo motoristas
+from notificacoes import notificacoes_bp
+
 
 app = Flask(__name__)
 CORS(app)
@@ -15,6 +17,7 @@ app.register_blueprint(estudantes_bp, url_prefix="/api/estudantes")
 app.register_blueprint(rotas_bp, url_prefix="/api/rotas")
 app.register_blueprint(inscricoes_bp, url_prefix="/inscricaoEstudante")
 app.register_blueprint(motoristas_bp, url_prefix="/api/motoristas")  # motoristas
+app.register_blueprint(notificacoes_bp, url_prefix="/api/notificacoes")
 
 # Rota de teste
 @app.route("/")

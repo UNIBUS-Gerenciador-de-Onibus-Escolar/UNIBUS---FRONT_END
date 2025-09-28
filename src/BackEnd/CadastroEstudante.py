@@ -11,13 +11,15 @@ def conectar():
         host="localhost",
         user="root",
         password="neto2007",
-        database="TccUnibus"
+        database="UNIBUS"
     )
 
+# =====================================================
+# Cadastrar Estudante
+# =====================================================
 @estudantes_bp.route("/cadastro", methods=["POST"])
 def cadastro():
     data = request.json or {}
-    # Campos obrigatórios
     obrigatorios = ["nome_completo", "escola", "turma", "email",
                     "numero_matricula", "nome_responsavel", "numero_responsavel", "senha"]
     faltando = [c for c in obrigatorios if not data.get(c)]
@@ -28,13 +30,22 @@ def cadastro():
     cursor = conn.cursor()
     try:
         estudante_id = str(uuid.uuid4())
+        profile_id = str(uuid.uuid4())
         senha_hash = generate_password_hash(data["senha"])
 
+        # Criar profile
+        cursor.execute("""
+            INSERT INTO profiles (id, email, nome_completo, role)
+            VALUES (%s, %s, %s, 'estudante')
+        """, (profile_id, data["email"], data["nome_completo"]))
+
+        # Criar estudante vinculado ao profile
         cursor.execute("""
             INSERT INTO estudantes (
                 id, nome_completo, escola, turma, email,
-                numero_matricula, nome_responsavel, numero_responsavel, senha, created_by
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                numero_matricula, nome_responsavel, numero_responsavel,
+                senha, created_by, profile_id
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             estudante_id,
             data["nome_completo"],
@@ -45,13 +56,18 @@ def cadastro():
             data["nome_responsavel"],
             data["numero_responsavel"],
             senha_hash,
-            data.get("created_by")
+            data.get("created_by"),
+            profile_id
         ))
+
         conn.commit()
-        return jsonify({"mensagem": "Cadastro realizado com sucesso!", "id": estudante_id}), 201
+        return jsonify({
+            "mensagem": "Cadastro realizado com sucesso!",
+            "estudante_id": estudante_id,
+            "profile_id": profile_id
+        }), 201
 
     except mysql.connector.IntegrityError as ie:
-        # Ex.: email ou matrícula duplicada (UNIQUE)
         print("IntegrityError:", ie)
         return jsonify({"erro": "Email ou número de matrícula já cadastrado.", "detalhe": str(ie)}), 409
 
@@ -63,7 +79,9 @@ def cadastro():
         cursor.close()
         conn.close()
 
-
+# =====================================================
+# Login Estudante
+# =====================================================
 @estudantes_bp.route("/login", methods=["POST"])
 def login():
     data = request.json or {}
@@ -76,7 +94,7 @@ def login():
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-            SELECT id, nome_completo, email, numero_matricula, escola, turma, senha
+            SELECT id, nome_completo, email, numero_matricula, escola, turma, senha, profile_id
             FROM estudantes
             WHERE email = %s
         """, (email,))

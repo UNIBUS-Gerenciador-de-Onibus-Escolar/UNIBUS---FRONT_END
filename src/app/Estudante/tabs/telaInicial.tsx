@@ -1,4 +1,4 @@
-import  React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -98,15 +98,28 @@ export default function MainRoutesScreen() {
         setRoutes(mappedRoutes);
 
         // Header da escola
-        if (data.length > 0) {
-          const schoolName = data[0].nome_escola || "Escola Desconhecida";
-          const totalRoutes = data.length;
-          const openRoutes = mappedRoutes.filter(r => r.subscribed).length;
-          setSchoolInfo({ name: schoolName, totalRoutes, openRoutes });
+        if (mappedRoutes.length > 0) {
+          try {
+            const primeiraRotaId = mappedRoutes[0].id;
+            const res = await fetch(`${API_URL}/api/rotas/detalhes/${primeiraRotaId}/${estudante.id}`);
+            const data = await res.json();
+            const schoolName = data.destino_escola?.nome || "Escola Desconhecida";
+            setSchoolInfo({
+              name: schoolName,
+              totalRoutes: mappedRoutes.length,
+              openRoutes: mappedRoutes.filter(r => r.subscribed).length,
+            });
+          } catch (err) {
+            console.log("Erro ao buscar escola do estudante:", err);
+            setSchoolInfo({
+              name: "Escola Desconhecida",
+              totalRoutes: mappedRoutes.length,
+              openRoutes: mappedRoutes.filter(r => r.subscribed).length,
+            });
+          }
         }
-      } catch (error) {
-        console.log(error);
-        Alert.alert("Erro", "Não foi possível carregar as rotas.");
+      } catch (err) {
+        console.log("Erro ao buscar rotas:", err);
       }
     }
     fetchRoutes();
@@ -132,7 +145,7 @@ export default function MainRoutesScreen() {
     });
   }, [routes, searchQuery, selectedFilter]);
 
-  // Inscrição / remoção de rota
+  // Inscrição / remoção de rota (toggle)
   async function handleSubscribeRoute(routeId: string) {
     if (!estudante) return;
     const route = routes.find(r => r.id === routeId);
@@ -145,23 +158,30 @@ export default function MainRoutesScreen() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ estudante_id: estudante.id, rota_id: routeId }),
         });
-        if (response.ok) setRoutes(prev => prev.map(r => (r.id === routeId ? { ...r, subscribed: true } : r)));
-        else {
+        if (!response.ok) {
           const data = await response.json();
           Alert.alert("Erro", data.erro || "Não foi possível inscrever-se.");
+          return;
         }
       } else {
-        const response = await fetch(`${API_URL}/inscricaoEstudante/remover`, {
+        const response = await fetch(`${API_URL}/inscricaoEstudante/remover?estudante_id=${estudante.id}&rota_id=${routeId}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ estudante_id: estudante.id, rota_id: routeId }),
         });
-        if (response.ok) setRoutes(prev => prev.map(r => (r.id === routeId ? { ...r, subscribed: false } : r)));
-        else {
+        if (!response.ok) {
           const data = await response.json();
           Alert.alert("Erro", data.erro || "Não foi possível remover a inscrição.");
+          return;
         }
       }
+
+      // Atualiza estado local
+      setRoutes(prev => {
+        const updated = prev.map(r => r.id === routeId ? { ...r, subscribed: !r.subscribed } : r);
+        setSchoolInfo(info => ({ ...info, openRoutes: updated.filter(r => r.subscribed).length }));
+        return updated;
+      });
+
     } catch (error) {
       console.log(error);
       Alert.alert("Erro", "Falha na comunicação com o servidor.");
@@ -186,7 +206,7 @@ export default function MainRoutesScreen() {
           <Image source={logo} style={styles.logo} resizeMode="contain" />
           <View>
             <Text style={styles.title}>UniBus</Text>
-            <Text style={styles.subtitle}>Transporte Escolar</Text>
+            <Text style={styles.subtitle}>- Gerenciador do Transporte Escolar -</Text>
           </View>
         </View>
         <View style={styles.schoolBox}>
@@ -211,107 +231,109 @@ export default function MainRoutesScreen() {
           />
         </View>
 
-        {/* Filtros */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: normalize(12) }}>
-          {filters.map(f => (
-            <TouchableOpacity
-              key={f.key}
-              style={[styles.filterButton, selectedFilter === f.key ? styles.filterButtonActive : null]}
-              onPress={() => setSelectedFilter(f.key as any)}
-            >
-              <Text style={[styles.filterText, selectedFilter === f.key ? styles.filterTextActive : null]}>
-                {f.label} ({f.count})
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        {/* Filtros */} 
+<ScrollView
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={{ paddingHorizontal: normalize(12) }}
+  style={styles.filtersScroll}
+  key={routes.length}
+>
+  {filters.map(f => (
+    <TouchableOpacity
+      key={f.key}
+      style={[
+        styles.filterButton,
+        selectedFilter === f.key ? styles.filterButtonActive : null,
+      ]}
+      onPress={() => setSelectedFilter(f.key as any)}
+    >
+      <Text
+        style={[
+          styles.filterText,
+          selectedFilter === f.key ? styles.filterTextActive : null,
+        ]}
+      >
+        {f.label} ({f.count})
+      </Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
 
         {/* Lista de rotas */}
         <FlatList
-  data={filteredRoutes}
-  keyExtractor={item => item.id}
-  showsVerticalScrollIndicator={false}
-  contentContainerStyle={{ paddingBottom: normalize(40) }}
-  renderItem={({ item }) => (
-    <View style={[styles.routeCard, { borderColor: '#FFD600', borderWidth: 2 }]}>
-      {/* Header do card */}
-      <View style={styles.routeHeader}>
-        <View style={styles.routeLeft}>
-          <View style={styles.routeIconWrap}>
-            <MaterialCommunityIcons name="bus-school" size={normalize(22)} color="#000" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.routeName}>{item.routeName}</Text>
-            <Text style={styles.metaText}>
-              <Ionicons name="person-outline" size={normalize(12)} /> {item.driver}
-            </Text>
-          </View>
-        </View>
-      </View>
+          data={filteredRoutes}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: normalize(40) }}
+          renderItem={({ item }) => (
+            <View style={[styles.routeCard, { borderColor: '#FFD600', borderWidth: 2 }]}>
+              <View style={styles.routeHeader}>
+                <View style={styles.routeLeft}>
+                  <View style={styles.routeIconWrap}>
+                    <MaterialCommunityIcons name="bus-school" size={normalize(22)} color="#000" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.routeName}>{item.routeName}</Text>
+                    <Text style={styles.metaText}>
+                      <Ionicons name="person-outline" size={normalize(12)} /> {item.driver}
+                    </Text>
+                  </View>
+                </View>
+              </View>
 
-      {/* Ida e Volta */}
-      <View style={styles.infoGrid}>
-        <View style={[styles.infoBoxBlue, { backgroundColor: '#f7f7f7ff' }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: normalize(6) }}>
-            <FontAwesome5 name="school" size={normalize(16)} color="#2563eb" />
-            <Text style={styles.infoTitle}>Ida</Text>
-          </View>
-          <Text style={styles.infoSmall}>Saída: {item.departureTime}</Text>
-          <Text style={styles.infoSmall}>Chegada: {item.arrivalTime}</Text>
-        </View>
+              <View style={styles.infoGrid}>
+                <View style={[styles.infoBoxBlue, { backgroundColor: '#f7f7f7ff' }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: normalize(6) }}>
+                    <FontAwesome5 name="school" size={normalize(16)} color="#2563eb" />
+                    <Text style={styles.infoTitle}>Ida</Text>
+                  </View>
+                  <Text style={styles.infoSmall}>Saída: {item.departureTime}</Text>
+                  <Text style={styles.infoSmall}>Chegada: {item.arrivalTime}</Text>
+                </View>
 
-        <View style={[styles.infoBoxGreen, { backgroundColor: '#f7f7f7ff' }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: normalize(6) }}>
-            <Ionicons name="home-outline" size={normalize(16)} color="#16a34a" />
-            <Text style={styles.infoTitle}>Volta</Text>
-          </View>
-          <Text style={styles.infoSmall}>Saída: {item.returnDeparture}</Text>
-          <Text style={styles.infoSmall}>Chegada: {item.returnArrival}</Text>
-        </View>
-      </View>
+                <View style={[styles.infoBoxGreen, { backgroundColor: '#f7f7f7ff' }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: normalize(6) }}>
+                    <Ionicons name="home-outline" size={normalize(16)} color="#16a34a" />
+                    <Text style={styles.infoTitle}>Volta</Text>
+                  </View>
+                  <Text style={styles.infoSmall}>Saída: {item.returnDeparture}</Text>
+                  <Text style={styles.infoSmall}>Chegada: {item.returnArrival}</Text>
+                </View>
+              </View>
 
-      {/* Botões */}
-      <View style={styles.actionsRow}>
-        <TouchableOpacity onPress={() => handleRoutePress(item.id)} style={styles.grayButton}>
-          <Ionicons name="location-outline" size={normalize(14)} color="#111" />
-          <Text style={styles.grayButtonText}>Ver Detalhes</Text>
-        </TouchableOpacity>
+              <View style={styles.actionsRow}>
+                <TouchableOpacity onPress={() => handleRoutePress(item.id)} style={styles.grayButton}>
+                  <Ionicons name="location-outline" size={normalize(14)} color="#111" />
+                  <Text style={styles.grayButtonText}>Ver Detalhes</Text>
+                </TouchableOpacity>
 
-        {!item.subscribed && (
-          <TouchableOpacity onPress={() => handleSubscribeRoute(item.id)} style={styles.primaryButton}>
-            <Ionicons name="add-circle-outline" size={normalize(16)} color="#111" />
-            <Text style={styles.primaryButtonText}>Inscrever-se</Text>
-          </TouchableOpacity>
-        )}
-
-        {item.subscribed && (
-          <TouchableOpacity style={styles.disabledButton}>
-            <Ionicons name="checkmark-circle" size={normalize(16)} color="#777" />
-            <Text style={styles.disabledButtonText}>Inscrito</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
-  )}
-  ListFooterComponent={() => (
-    <View style={styles.requestCard}>
-      <Text style={styles.requestTitle}>Não encontrou sua rota?</Text>
-      <Text style={styles.requestSubtitle}>
-        Solicite uma nova rota para sua região. Com {pendingRequests} solicitações pendentes, há grande chance de aprovação!
-      </Text>
-      <TouchableOpacity onPress={handleRequestRoute} style={styles.requestButton}>
-        <Ionicons name="add" size={normalize(18)} color="#FFD600" />
-        <Text style={styles.requestButtonText}>Solicitar Nova Rota</Text>
-      </TouchableOpacity>
-    </View>
-  )}
-/>
-
+                <TouchableOpacity onPress={() => handleSubscribeRoute(item.id)} style={item.subscribed ? styles.disabledButton : styles.primaryButton}>
+                  <Ionicons name={item.subscribed ? "checkmark-circle" : "add-circle-outline"} size={normalize(16)} color="#111" />
+                  <Text style={item.subscribed ? styles.disabledButtonText : styles.primaryButtonText}>
+                    {item.subscribed ? "Inscrito" : "Inscrever-se"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+          ListFooterComponent={() => (
+            <View style={styles.requestCard}>
+              <Text style={styles.requestTitle}>Não encontrou sua rota?</Text>
+              <Text style={styles.requestSubtitle}>
+                Solicite uma nova rota para sua região. Com {pendingRequests} solicitações pendentes, há grande chance de aprovação!
+              </Text>
+              <TouchableOpacity onPress={handleRequestRoute} style={styles.requestButton}>
+                <Ionicons name="add" size={normalize(18)} color="#FFD600" />
+                <Text style={styles.requestButtonText}>Solicitar Nova Rota</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
       </View>
     </View>
   );
 }
-
 // ================================
 // ESTILOS
 // ================================
@@ -328,10 +350,48 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: normalize(18) },
   searchContainer: { height: normalize(44), borderRadius: normalize(14), backgroundColor: "#fff", borderWidth: 1, borderColor: "#e6e6e6", flexDirection: "row", alignItems: "center", marginTop: normalize(12) },
   searchInput: { flex: 1, paddingHorizontal: normalize(12), fontSize: normalize(14), color: "#111", height: "100%" },
-  filterButton: { paddingHorizontal: normalize(12), paddingVertical: normalize(8), borderRadius: normalize(12), backgroundColor: "#f3f4f6", marginRight: normalize(10), width: normalize(100), height: normalize(36), justifyContent: "center", alignItems: "center", flexDirection: "row" },
-  filterButtonActive: { backgroundColor: "#FFD600" },
-  filterText: { fontWeight: "700", color: "#444", fontSize: normalize(13) },
-  filterTextActive: { color: "#000" },
+// Container do ScrollView (pode deixar inline mesmo)
+filtersScroll: {
+  marginTop: normalize(12),
+  marginBottom: normalize(8),
+  height: normalize(50)
+  
+},
+
+// Botão de filtro
+filterButton: {
+  paddingHorizontal: normalize(15),
+  paddingVertical: normalize(8),
+  borderRadius: normalize(20),  
+  backgroundColor: "#f3f4f6",
+  marginRight: normalize(8),
+  borderWidth: 1,
+  borderColor: "#eee",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  minWidth: 60,             // largura mínima
+  alignSelf: "flex-start",  // adapta à largura do conteúdo
+},
+
+filterText: {
+  fontSize: normalize(13),
+  color: "#333",
+  flexShrink: 1,            // texto pode encolher se faltar espaço
+},
+
+
+filterButtonActive: {
+  backgroundColor: "#FFD600",
+  borderColor: "#E6B800",
+},
+
+
+filterTextActive: {
+  fontWeight: "700",
+  color: "#111",
+},
+
 
   // Card de rota
   routeCard: { backgroundColor: "#fff", borderRadius: normalize(18), marginTop: normalize(14), padding: normalize(14), elevation: 2, borderWidth: 1, borderColor: "#eee" },

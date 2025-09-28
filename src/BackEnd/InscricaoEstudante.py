@@ -9,7 +9,7 @@ def conectar():
         host="localhost",
         user="root",
         password="neto2007",
-        database="TccUnibus"
+        database="UNIBUS"
     )
 
 # =====================================================
@@ -36,10 +36,11 @@ def inscrever_estudante():
         if cursor.fetchone():
             return jsonify({"erro": "Estudante já inscrito nesta rota"}), 400
 
+        # Inserir sem o campo 'id', pois é auto-increment
         cursor.execute("""
-            INSERT INTO inscricoes_rotas (id, estudante_id, rota_id)
-            VALUES (%s, %s, %s)
-        """, (str(uuid.uuid4()), estudante_id, rota_id))
+            INSERT INTO inscricoes_rotas (estudante_id, rota_id)
+            VALUES (%s, %s)
+        """, (estudante_id, rota_id))
         conn.commit()
         return jsonify({"mensagem": "Inscrição realizada com sucesso!"}), 201
 
@@ -50,15 +51,13 @@ def inscrever_estudante():
         cursor.close()
         conn.close()
 
-
 # =====================================================
 # Remover inscrição do estudante
 # =====================================================
 @inscricoes_bp.route("/remover", methods=["DELETE"])
 def remover_inscricao():
-    data = request.json
-    estudante_id = data.get("estudante_id")
-    rota_id = data.get("rota_id")
+    estudante_id = request.args.get("estudante_id")
+    rota_id = request.args.get("rota_id")
 
     if not estudante_id or not rota_id:
         return jsonify({"erro": "Estudante e rota são obrigatórios"}), 400
@@ -80,7 +79,6 @@ def remover_inscricao():
     finally:
         cursor.close()
         conn.close()
-
 
 # =====================================================
 # Listar estudantes inscritos em uma rota
