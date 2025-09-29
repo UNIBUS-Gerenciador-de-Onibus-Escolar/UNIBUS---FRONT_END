@@ -210,7 +210,7 @@ export default function MainRoutesScreen() {
           </View>
         </View>
         <View style={styles.schoolBox}>
-          <FontAwesome5 name="school" size={22} color="#111" />
+          <FontAwesome5 name="school" size={22} color="#FFD600" />
           <View style={{ marginLeft: 10 }}>
             <Text style={styles.schoolName}>{schoolInfo.name}</Text>
             <Text style={styles.schoolMeta}>{schoolInfo.totalRoutes} rotas • {schoolInfo.openRoutes} abertas</Text>
@@ -271,7 +271,7 @@ export default function MainRoutesScreen() {
               <View style={styles.routeHeader}>
                 <View style={styles.routeLeft}>
                   <View style={styles.routeIconWrap}>
-                    <MaterialCommunityIcons name="bus-school" size={normalize(22)} color="#000" />
+                    <MaterialCommunityIcons name="bus-school" size={normalize(22)} color="#FFD600" />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.routeName}>{item.routeName}</Text>
@@ -338,15 +338,15 @@ export default function MainRoutesScreen() {
 // ESTILOS
 // ================================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#ffffffff" },
   header: { backgroundColor: "#FFD600", paddingTop: 60, paddingBottom: 16, paddingHorizontal: 16 },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: normalize(12) },
   logo: { width: 60, height: 60, borderRadius: 110 },
   title: { fontSize: normalize(18), fontWeight: "800", color: "#000" },
   subtitle: { fontSize: normalize(12), color: "#111" },
-  schoolBox: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff7cc", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, marginTop: 16 },
-  schoolName: { fontWeight: "700", color: "#111", fontSize: normalize(14) },
-  schoolMeta: { color: "#444", fontSize: normalize(12), marginTop: normalize(2) },
+  schoolBox: { flexDirection: "row", alignItems: "center", backgroundColor: "#1b1b1bff", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, marginTop: 16 },
+  schoolName: { fontWeight: "700", color: "#FFD600", fontSize: normalize(14) },
+  schoolMeta: { color: "#FFD600", fontSize: normalize(12), marginTop: normalize(2) },
   content: { flex: 1, paddingHorizontal: normalize(18) },
   searchContainer: { height: normalize(44), borderRadius: normalize(14), backgroundColor: "#fff", borderWidth: 1, borderColor: "#e6e6e6", flexDirection: "row", alignItems: "center", marginTop: normalize(12) },
   searchInput: { flex: 1, paddingHorizontal: normalize(12), fontSize: normalize(14), color: "#111", height: "100%" },
@@ -412,7 +412,7 @@ filterTextActive: {
   disabledButton: { flexDirection: "row", alignItems: "center", gap: normalize(6), backgroundColor: "#f3f4f6", paddingVertical: normalize(8), paddingHorizontal: normalize(14), borderRadius: normalize(12) },
   disabledButtonText: { fontSize: normalize(13), fontWeight: "600", color: "#111" },
   routeIconWrap: {
-  backgroundColor: '#FFF7CC',
+  backgroundColor: '#000000ff',
   padding: normalize(10),
   borderRadius: normalize(12),
 },

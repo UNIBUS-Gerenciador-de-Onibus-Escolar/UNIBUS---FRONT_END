@@ -5,14 +5,14 @@ import * as ImagePicker from 'expo-image-picker';
 
 export default function Perfil() {
   const [usuario, setUsuario] = useState({
-    nome: 'Perfil teste',
-    email: 'teste.unibus@email.com',
-    telefone: '(11) 91234-5678',
-    tipo: 'Aluno',
+    nome: 'Roberto Carlos da Silva',
+    email: 'Roberto123@gmail.com',
+    telefone: '(81) 99234-5678',
+    tipo: 'Estudante',
     foto: null as string | null,
     onibus: [
-      { id: '1', placa: 'ABC-1234', modelo: 'Van Sprinter' },
-      { id: '2', placa: 'XYZ-5678', modelo: 'Micro-ônibus' },
+      { id: '1', rota: 'Xique-Xique', motorista: 'João Paulo' },
+      { id: '2', rota: 'Centro', motorista: 'Fernando Souza' },
     ],
   });
 
@@ -64,10 +64,12 @@ export default function Perfil() {
         ) : (
           <View style={styles.photoPlaceholder}>
             <Ionicons name="person" size={80} color="#ccc" />
-            <Text style={{ color: '#888', marginTop: 8 }}>Clique para adicionar foto</Text>
+            <Text style={{ color: '#888', marginTop: 10 , fontSize: 8 }}>Clique para adicionar foto</Text>
           </View>
         )}
       </TouchableOpacity>
+      <View style={styles.BoxSection}>
+       <Text style={styles.sectionTitle}>Informações pessoais</Text>
 
       <Text style={styles.name}>{usuario.nome}</Text>
       <Text style={styles.email}>{usuario.email}</Text>
@@ -81,8 +83,11 @@ export default function Perfil() {
         <MaterialIcons name="person-outline" size={20} color="#555" />
         <Text style={styles.infoText}>{usuario.tipo}</Text>
       </View>
+        </View>
 
-      <Text style={styles.sectionTitle}>Ônibus cadastrados</Text>
+      <View style={styles.BoxSection}>
+
+      <Text style={styles.sectionTitle}>Rotas Inscritas</Text>
 
       {usuario.onibus.length === 0 ? (
         <Text style={{ color: '#999', fontStyle: 'italic' }}>Nenhum ônibus cadastrado.</Text>
@@ -91,22 +96,18 @@ export default function Perfil() {
           <View key={item.id} style={styles.onibusItem}>
             <FontAwesome5 name="bus" size={24} color="#f2c200" />
             <View style={{ marginLeft: 12 }}>
-              <Text style={styles.onibusText}>Placa: {item.placa}</Text>
-              <Text style={styles.onibusText}>Modelo: {item.modelo}</Text>
+              <Text style={styles.onibusText}>Rota: {item.rota}</Text>
+              <Text style={styles.onibusText}>Motorista: {item.motorista}</Text>
             </View>
           </View>
         ))
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handleEditarPerfil}>
-        <Ionicons name="create-outline" size={20} color="#fff" />
-        <Text style={styles.buttonText}>Editar Perfil</Text>
-      </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
-        <Ionicons name="exit-outline" size={20} color="#fff" />
-        <Text style={styles.buttonText}>Sair</Text>
-      </TouchableOpacity>
+     
+
+      
     </ScrollView>
   );
 }
@@ -115,12 +116,14 @@ export default function Perfil() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#FFFDF5',
+    height: '100%',
+    backgroundColor: '#ffffffff',
     alignItems: 'center',
     paddingBottom: 40,
   },
   photoContainer: {
-    marginBottom: 20,
+    marginTop: 50,
+    marginBottom: 50,
   },
   photo: {
     width: 140,
@@ -136,18 +139,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    fontSize: 26,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#696969ff',
   },
   email: {
     fontSize: 16,
-    color: '#666',
+    color: '#696969ff',
     marginBottom: 30,
+  },
+  BoxSection:{
+    borderWidth: 1,
+    borderColor: '#FFD740',
+    padding: 15,
+    borderRadius: 10,
+    width: '100%',
+    marginBottom: 20,
   },
   infoBox: {
     flexDirection: 'row',
-    alignItems: 'center',
+    
     marginBottom: 15,
     width: '80%',
   },
@@ -172,9 +183,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    backgroundColor: '#fffbea',
+    backgroundColor: '#ffffffff',
     padding: 12,
     borderRadius: 8,
+    borderWidth: 1, 
+    borderColor: '#FFD740',
   },
   onibusText: {
     fontSize: 16,

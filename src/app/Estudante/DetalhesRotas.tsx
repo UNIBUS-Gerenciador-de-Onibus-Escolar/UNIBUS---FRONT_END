@@ -153,7 +153,7 @@ const DetalhesRotas = () => {
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={["#FFD600", "#FFB300"]} style={styles.header}>
+      <LinearGradient colors={["#FFD600", "#FFD600"]} style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => router.back()}>
             <X size={28} color="black" />
@@ -209,7 +209,7 @@ const DetalhesRotas = () => {
                 latitude: s.latitude,
                 longitude: s.longitude,
               }))}
-              strokeColor="#FFB300"
+              strokeColor="#FFD600"
               strokeWidth={4}
             />
           )}
@@ -218,7 +218,7 @@ const DetalhesRotas = () => {
 
       {/* Trajeto e Paradas */}
       <View style={styles.card}>
-        <LinearGradient colors={["#FFD600", "#FFB300"]} style={styles.cardHeader}>
+        <LinearGradient colors={["#FFD600", "#FFD600"]} style={styles.cardHeader}>
           <MapPin size={20} color="black" />
           <Text style={styles.cardTitle}> Trajeto e Paradas</Text>
         </LinearGradient>
@@ -227,9 +227,9 @@ const DetalhesRotas = () => {
             <View key={stop.id} style={styles.stopItem}>
               <View style={styles.stopIcon}>
                 {stop.type === "origin" ? (
-                  <Home size={20} color="white" />
+                  <Home size={20} color="#FFD600" />
                 ) : stop.type === "destination" ? (
-                  <School size={20} color="white" />
+                  <School size={20} color="#FFD600" />
                 ) : (
                   <Text style={styles.stopIndex}>{stop.id}</Text>
                 )}
@@ -251,7 +251,7 @@ const DetalhesRotas = () => {
 
       {/* Motorista */}
       <View style={styles.card}>
-        <LinearGradient colors={["#FFD600", "#FFB300"]} style={styles.cardHeader}>
+        <LinearGradient colors={["#FFD600", "#FFD600"]} style={styles.cardHeader}>
           <User size={18} color="black" />
           <Text style={styles.cardTitle}> Motorista</Text>
         </LinearGradient>
@@ -266,7 +266,7 @@ const DetalhesRotas = () => {
 
       {/* Veículo */}
       <View style={styles.card}>
-        <LinearGradient colors={["#FFD600", "#FFB300"]} style={styles.cardHeader}>
+        <LinearGradient colors={["#FFD600", "#FFD600"]} style={styles.cardHeader}>
           <Car size={18} color="black" />
           <Text style={styles.cardTitle}> Veículo</Text>
         </LinearGradient>
@@ -278,7 +278,7 @@ const DetalhesRotas = () => {
       {/* Observações */}
       {routeData.observacoes ? (
         <View style={styles.card}>
-          <LinearGradient colors={["#FFD600", "#FFB300"]} style={styles.cardHeader}>
+          <LinearGradient colors={["#FFD600", "#FFD600"]} style={styles.cardHeader}>
             <Text style={styles.cardTitle}> Observações</Text>
           </LinearGradient>
           <View style={styles.cardBody}>
@@ -293,9 +293,9 @@ const DetalhesRotas = () => {
 export default DetalhesRotas;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff", paddingTop: 20, },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: { padding: 16, paddingTop: 40,  marginBottom:50, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 ,},
+  header: { padding: 16, paddingTop: 80,  marginBottom:40, borderBottomLeftRadius: 10, borderBottomRightRadius: 10 ,},
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   statusRow: { flexDirection: "row", alignItems: "center" },
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "green", marginRight: 6 },
@@ -308,8 +308,8 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: "bold", marginLeft: 6, color: "black" },
   cardBody: { padding: 12 },
   stopItem: { flexDirection: "row", alignItems: "center", marginVertical: 6 },
-  stopIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#FFB300", justifyContent: "center", alignItems: "center", marginRight: 10 },
-  stopIndex: { fontSize: 14, fontWeight: "bold", color: "white" },
+  stopIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#000000ff", justifyContent: "center", alignItems: "center", marginRight: 10 },
+  stopIndex: { fontSize: 14, fontWeight: "bold", color: "#FFD600" },
   stopName: { fontSize: 15, color: "black" },
   stopBadge: { fontSize: 12, color: "gray", marginLeft: 6 },
   stopTime: { fontSize: 14, color: "black" },

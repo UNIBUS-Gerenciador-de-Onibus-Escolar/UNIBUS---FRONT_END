@@ -10,9 +10,15 @@ export default function Configuracoes() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>⚙️ Configurações</Text>
 
+      <View style={styles.header}>
+        <Ionicons name="settings-outline" size={28} color="#000000ff" />
+      <Text style={styles.title}> Configurações</Text>
+      </View>
       {/* Seção Conta */}
+
+    <View style={styles.mainContainer}>
+
       <Text style={styles.sectionTitle}>Conta</Text>
 
       <TouchableOpacity style={styles.option} onPress={() => alert('Editar perfil')}>
@@ -33,6 +39,7 @@ export default function Configuracoes() {
         <Text style={styles.optionText}>Notificações</Text>
         <Switch
           value={notificacoesAtivas}
+
           onValueChange={setNotificacoesAtivas}
           style={{ marginLeft: 'auto' }}
         />
@@ -46,10 +53,6 @@ export default function Configuracoes() {
       {/* Seção Sistema */}
       <Text style={styles.sectionTitle}>Sistema</Text>
 
-      <View style={styles.option}>
-        <MaterialIcons name="timer" size={22} color="#333" />
-        <Text style={styles.optionText}>Tempo de uso: 1h 23min</Text>
-      </View>
 
       <View style={styles.option}>
         <FontAwesome name="info-circle" size={22} color="#333" />
@@ -62,9 +65,9 @@ export default function Configuracoes() {
         <Text style={[styles.optionText, { color: '#d00' }]}>Sair</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.back()} style={styles.voltar}>
-        <Text style={styles.voltarText}>← Voltar</Text>
-      </TouchableOpacity>
+      
+
+      </View>
     </View>
   );
 }
@@ -72,18 +75,38 @@ export default function Configuracoes() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fffbea',
-    padding: 24,
+    backgroundColor: '#ffffffff',
+    padding: 0,
+  },
+  header: {
+    backgroundColor: '#FFD600',
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 0,
+    padding: 15,
+    paddingTop: 70,
+  },
+
+  mainContainer: {
+    padding: 25,
+    margin:'auto',
+    width: 380,
+    height: 600,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#FFD600',
+    borderRadius: 10, 
+    backgroundColor: '#ffffffff',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
+    
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#888',
+    color: '#000000ff',
     marginTop: 25,
     marginBottom: 6,
   },

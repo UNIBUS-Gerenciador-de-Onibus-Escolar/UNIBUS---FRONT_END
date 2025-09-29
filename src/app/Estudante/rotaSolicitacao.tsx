@@ -138,7 +138,7 @@ const RouteRequestScreen = () => {
     <ScrollView showsVerticalScrollIndicator={false}>
       {/* Cabeçalho com gradiente */}
       <LinearGradient
-        colors={["#FFD600", "#FFB300"]}
+        colors={["#FFD600", "#FFD600"]}
         style={styles.header}
       >
         <TouchableOpacity style={styles.backButton}>
@@ -151,7 +151,7 @@ const RouteRequestScreen = () => {
           </Text>
           <View style={styles.infoCard}>
         <LinearGradient
-          colors={["#FFD600", "#FFB300"]}
+          colors={["#FFD600", "#FFD600"]}
           style={styles.infoIcon}
         >
           <AlertCircle size={18} color="white" />
@@ -176,7 +176,7 @@ const RouteRequestScreen = () => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <LinearGradient
-            colors={["#FFD600", "#FFB300"]}
+            colors={["#FFD600", "#FFD600"]}
             style={styles.sectionIcon}
           >
             <User size={18} color="black" />
@@ -230,7 +230,7 @@ const RouteRequestScreen = () => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <LinearGradient
-            colors={["#FFD600", "#FFB300"]}
+            colors={["#FFD600", "#FFD600"]}
             style={styles.sectionIcon}
           >
             <Clock size={18} color="black" />
@@ -259,7 +259,7 @@ const RouteRequestScreen = () => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <LinearGradient
-            colors={["#FFD600", "#FFB300"]}
+            colors={["#FFD600", "#FFD600"]}
             style={styles.sectionIcon}
           >
             <MapPin size={18} color="black" />
@@ -301,7 +301,7 @@ const RouteRequestScreen = () => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <LinearGradient
-            colors={["#FFD600", "#FFB300"]}
+            colors={["#FFD600", "#FFD600"]}
             style={styles.sectionIcon}
           >
             <Users size={18} color="black" />
@@ -327,7 +327,7 @@ const RouteRequestScreen = () => {
 
       {/* Botão Enviar com gradiente e margem inferior */}
       <LinearGradient
-        colors={["#FFD600", "#FFB300"]}
+        colors={["#FFD600", "#FFD600"]}
         style={styles.submitButtonWrapper}
       >
         <TouchableOpacity
