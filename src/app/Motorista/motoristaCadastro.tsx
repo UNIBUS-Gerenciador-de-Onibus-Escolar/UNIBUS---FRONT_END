@@ -17,20 +17,17 @@ import { API_URL } from '../../BackEnd/IPconfig';
 
 const MotoristaCadastro = () => {
   const router = useRouter();
-
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [senha, setSenha] = useState("");
   const [cnh, setCnh] = useState("");
-  const [validadeCnh, setValidadeCnh] = useState("");
   const [placaOnibus, setPlacaOnibus] = useState("");
-  const [modeloOnibus, setModeloOnibus] = useState("");
   const [rota, setRota] = useState("");
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const BACKEND_URL = `${API_URL}/api/motoristas/cadastrar`; // emulador Android
+  const BACKEND_URL = `${API_URL}/api/motoristas/cadastrar`;
 
   const handleSelecionarFoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -58,17 +55,7 @@ const MotoristaCadastro = () => {
   const validarEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
   const handleCadastro = async () => {
-    if (
-      !nomeCompleto ||
-      !email ||
-      !telefone ||
-      !senha ||
-      !cnh ||
-      !validadeCnh ||
-      !placaOnibus ||
-      !modeloOnibus ||
-      !rota
-    ) {
+    if (!nomeCompleto || !email || !telefone || !senha || !cnh || !placaOnibus || !rota) {
       Alert.alert("Atenção", "Preencha todos os campos obrigatórios.");
       return;
     }
@@ -90,16 +77,13 @@ const MotoristaCadastro = () => {
           telefone,
           senha,
           cnh,
-          validade_cnh: validadeCnh,
           placa_onibus: placaOnibus.toUpperCase(),
-          modelo_onibus: modeloOnibus,
           rota,
           foto_perfil: fotoPerfil || "",
         }),
       });
 
       const data = await response.json();
-
       if (!response.ok) throw new Error(data.erro || "Falha no cadastro");
 
       Alert.alert("Sucesso", "Cadastro realizado com sucesso!");
@@ -133,118 +117,31 @@ const MotoristaCadastro = () => {
         )}
       </TouchableOpacity>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nome completo"
-        value={nomeCompleto}
-        onChangeText={setNomeCompleto}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Telefone"
-        value={telefone}
-        onChangeText={setTelefone}
-        keyboardType="phone-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        value={senha}
-        onChangeText={setSenha}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Número da CNH"
-        value={cnh}
-        onChangeText={setCnh}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Validade da CNH (DD/MM/AAAA)"
-        value={validadeCnh}
-        onChangeText={setValidadeCnh}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Placa do ônibus"
-        value={placaOnibus}
-        onChangeText={(text) => setPlacaOnibus(text.toUpperCase())}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Modelo/ano do ônibus"
-        value={modeloOnibus}
-        onChangeText={setModeloOnibus}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Rota"
-        value={rota}
-        onChangeText={setRota}
-      />
+      <TextInput style={styles.input} placeholder="Nome completo" value={nomeCompleto} onChangeText={setNomeCompleto} />
+      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+      <TextInput style={styles.input} placeholder="Telefone" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
+      <TextInput style={styles.input} placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
+      <TextInput style={styles.input} placeholder="Número da CNH" value={cnh} onChangeText={setCnh} />
+      <TextInput style={styles.input} placeholder="Placa do ônibus" value={placaOnibus} onChangeText={(text) => setPlacaOnibus(text.toUpperCase())} />
+      <TextInput style={styles.input} placeholder="Rota" value={rota} onChangeText={setRota} />
 
-      <TouchableOpacity
-        style={[styles.botao, loading && { backgroundColor: "#ccc" }]}
-        onPress={handleCadastro}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#000" />
-        ) : (
-          <Text style={styles.textoBotao}>Cadastrar</Text>
-        )}
+      <TouchableOpacity style={[styles.botao, loading && { backgroundColor: "#ccc" }]} onPress={handleCadastro} disabled={loading}>
+        {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.textoBotao}>Cadastrar</Text>}
       </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    paddingTop: 60,
-    paddingHorizontal: 30,
-    paddingBottom: 40,
-    backgroundColor: "#FFF8E7",
-  },
+  container: { flexGrow: 1, paddingTop: 60, paddingHorizontal: 30, paddingBottom: 40, backgroundColor: "#FFF8E7" },
   voltar: { position: "absolute", top: 40, left: 20 },
   titulo: { fontSize: 26, fontWeight: "bold", marginBottom: 25, color: "#222", alignSelf: "center" },
   fotoWrapper: { alignSelf: "center", marginBottom: 25 },
   foto: { width: 120, height: 120, borderRadius: 60 },
-  fotoPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#EEE",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  fotoPlaceholder: { width: 120, height: 120, borderRadius: 60, backgroundColor: "#EEE", justifyContent: "center", alignItems: "center" },
   fotoTexto: { marginTop: 5, color: "#888", fontSize: 12 },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#CCC",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    backgroundColor: "#FFF",
-  },
-  botao: {
-    height: 50,
-    backgroundColor: "#FFB700",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-    marginTop: 10,
-  },
+  input: { height: 50, borderWidth: 1, borderColor: "#CCC", borderRadius: 10, paddingHorizontal: 15, marginBottom: 15, backgroundColor: "#FFF" },
+  botao: { height: 50, backgroundColor: "#FFB700", justifyContent: "center", alignItems: "center", borderRadius: 10, marginTop: 10 },
   textoBotao: { color: "#000", fontSize: 16, fontWeight: "bold" },
 });
 

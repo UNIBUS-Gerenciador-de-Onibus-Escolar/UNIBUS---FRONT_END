@@ -5,6 +5,9 @@ import json
 
 notificacoes_bp = Blueprint('notificacoes_bp', __name__)
 
+# -----------------------
+# Conexão com o banco
+# -----------------------
 def conectar():
     return mysql.connector.connect(
         host="localhost",
@@ -24,12 +27,13 @@ def listar_rotas():
         cursor.execute("SELECT id, nome_rota FROM rotas WHERE is_active = 1 ORDER BY nome_rota")
         rows = cursor.fetchall()
         data = [{'id': r[0], 'nome_rota': r[1]} for r in rows]
-        cursor.close()
-        conn.close()
         return jsonify(data)
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # -----------------------
 # GET /motoristas
@@ -42,12 +46,13 @@ def listar_motoristas():
         cursor.execute("SELECT id, nome_completo, rota FROM motoristas WHERE is_active = 1 ORDER BY nome_completo")
         rows = cursor.fetchall()
         data = [{'id': r[0], 'nome_completo': r[1], 'rota': r[2]} for r in rows]
-        cursor.close()
-        conn.close()
         return jsonify(data)
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # -----------------------
 # GET /listar/<usuario_id>
@@ -75,8 +80,6 @@ def listar_notificacoes_usuario(usuario_id):
         """
         cursor.execute(query, (usuario_id,))
         rows = cursor.fetchall()
-        cursor.close()
-        conn.close()
         for r in rows:
             if hasattr(r['created_at'], 'isoformat'):
                 r['created_at'] = r['created_at'].isoformat()
@@ -84,6 +87,9 @@ def listar_notificacoes_usuario(usuario_id):
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # -----------------------
 # PUT /marcar_lida/<notificacao_id>
@@ -95,18 +101,21 @@ def marcar_lida(notificacao_id):
         cursor = conn.cursor()
         cursor.execute("UPDATE notificacoes SET lida = TRUE WHERE id = %s", (notificacao_id,))
         conn.commit()
-        cursor.close()
-        conn.close()
         return jsonify({"success": True})
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # -----------------------
 # POST /enviar
 # -----------------------
 @notificacoes_bp.route('/enviar', methods=['POST'])
 def enviar_notificacao():
+    conn = None
+    cursor = None
     try:
         payload = request.get_json()
         remetente_tipo = payload.get('remetente_tipo', 'Gestão')
@@ -207,15 +216,18 @@ def enviar_notificacao():
         # -----------------------
         # Insere notificações individuais
         # -----------------------
+        if not recipient_user_ids:
+            return jsonify({"error": "Nenhum destinatário encontrado."}), 400
+
         for uid in recipient_user_ids:
+            if uid is None:
+                continue  # ignora valores nulos
             cursor.execute("""
                 INSERT INTO notificacoes (envio_id, usuario_id, titulo, mensagem, tipo)
                 VALUES (%s,%s,%s,%s,%s)
             """, (envio_id, uid, titulo, mensagem, tipo))
 
         conn.commit()
-        cursor.close()
-        conn.close()
 
         return jsonify({
             "success": True,
@@ -226,73 +238,31 @@ def enviar_notificacao():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # -----------------------
 # GET /historico
 # -----------------------
 @notificacoes_bp.route('/historico', methods=['GET'])
-def historico_envios():
+def historico_notificacoes():
     try:
-        limit = int(request.args.get('limit', 50))
         conn = conectar()
         cursor = conn.cursor(dictionary=True)
-
         cursor.execute("""
-            SELECT id, remetente_tipo, destinatario_tipo, titulo, mensagem, prioridade,
-                   routes_json, drivers_json, created_at
-            FROM notificacoes_envios
-            ORDER BY created_at DESC
-            LIMIT %s
-        """, (limit,))
-        envios = cursor.fetchall()
-
-        result = []
-        for e in envios:
-            created_at = e['created_at'].isoformat() if hasattr(e['created_at'], 'isoformat') else str(e['created_at'])
-            routes = json.loads(e['routes_json']) if e['routes_json'] else []
-            drivers = json.loads(e['drivers_json']) if e['drivers_json'] else []
-            destinatario_tipo = e['destinatario_tipo'] if e.get('destinatario_tipo') else "Todos"
-
-            cursor.execute("SELECT COUNT(*) AS count FROM notificacoes WHERE envio_id = %s AND lida = TRUE", (e['id'],))
-            read_count = cursor.fetchone()['count']
-
-            cursor.execute("SELECT COUNT(*) AS total FROM notificacoes WHERE envio_id = %s", (e['id'],))
-            total_recipients = cursor.fetchone()['total']
-
-            result.append({
-                "id": e["id"],
-                "titulo": e["titulo"],
-                "mensagem": e["mensagem"],
-                "destinatario_tipo": destinatario_tipo,
-                "routes": routes,
-                "drivers": drivers,
-                "prioridade": e["prioridade"],
-                "created_at": created_at,
-                "totalRecipients": total_recipients,
-                "readCount": read_count,
-            })
-
-        cursor.close()
-        conn.close()
-        return jsonify(result)
+            SELECT n.id, n.envio_id, n.usuario_id, n.titulo, n.mensagem, n.tipo, n.lida, n.created_at
+            FROM notificacoes n
+            ORDER BY n.created_at DESC
+        """)
+        rows = cursor.fetchall()
+        for r in rows:
+            if hasattr(r['created_at'], 'isoformat'):
+                r['created_at'] = r['created_at'].isoformat()
+        return jsonify(rows)
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
-
-# -----------------------
-# DELETE /apagar/<envio_id>
-# -----------------------
-@notificacoes_bp.route('/apagar/<envio_id>', methods=['DELETE'])
-def apagar_notificacao(envio_id):
-    try:
-        conn = conectar()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM notificacoes WHERE envio_id = %s", (envio_id,))
-        cursor.execute("DELETE FROM notificacoes_envios WHERE id = %s", (envio_id,))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return jsonify({"success": True, "message": "Notificação excluída com sucesso."})
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()

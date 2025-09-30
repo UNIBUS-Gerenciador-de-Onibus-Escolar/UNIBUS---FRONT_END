@@ -45,7 +45,7 @@ export default function Index() {
         <TouchableOpacity
           style={styles.button}
           activeOpacity={0.8}
-          onPress={() => router.push('/GestaoEscolar/gestao' as any)}
+          onPress={() => router.push('/GestaoEscolar/cadastroGestao' as any)}
         >
           <Image
             style={styles.icon}
