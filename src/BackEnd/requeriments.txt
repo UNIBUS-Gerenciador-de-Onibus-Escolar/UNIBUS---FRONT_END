@@ -1,0 +1,12 @@
+Flask
+Flask-Cors
+mysql-connector-python
+npm install react react-native
+npm install expo-router
+npm install lottie-react-native
+npm install react-native-dropdown-picker
+npm install react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context @react-native-masked-view/masked-view
+
+# Tipagens TypeScript (dev dependencies)
+npm install --save-dev @types/react @types/react-native @types/react-native-dropdown-picker
+
