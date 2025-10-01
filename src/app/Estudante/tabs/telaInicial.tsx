@@ -11,6 +11,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  BackHandler
 } from "react-native";
 import { Ionicons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -52,6 +53,21 @@ export default function MainRoutesScreen() {
   const [routes, setRoutes] = useState<RouteItem[]>([]);
   const [schoolInfo, setSchoolInfo] = useState<SchoolInfo>({ name: "Carregando...", totalRoutes: 0, openRoutes: 0 });
   const [pendingRequests] = useState(12);
+  
+   // 🔒 Bloqueia botão voltar do Android
+  useEffect(() => {
+    const backAction = () => {
+      // true = impede ação de voltar
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   // Carregar estudante
   useEffect(() => {

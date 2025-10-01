@@ -1,10 +1,37 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Switch } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Switch, BackHandler, TouchableOpacity, Alert  } from "react-native";
+import { Ionicons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from 'expo-router';
 
 export default function ConfiguracoesScreen() {
+  const router = useRouter(); // Adiciona o hook useRouter
+    // Função de logout
+  const handleLogout = () => {
+    Alert.alert(
+      "Sair",
+      "Deseja realmente sair da sua conta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: () => {
+            router.replace("/"); // volta para tela de login (index.tsx)
+          }
+        }
+      ]
+    );
+  };
   const [darkMode, setDarkMode] = useState(false);
   return (
     <View style={styles.container}>
+       <TouchableOpacity 
+          style={[styles.option, { marginTop: 20 }]} 
+          onPress={handleLogout}
+        >
+          <Ionicons name="exit-outline" size={22} color="#d00" />
+          <Text style={[styles.optionText, { color: '#d00' }]}>Sair</Text>
+        </TouchableOpacity>
       <Text style={styles.title}>Configurações</Text>
       <View style={styles.option}>
         <Text>Modo Escuro</Text>
@@ -27,4 +54,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
+  optionText: { fontSize: 16},
 });

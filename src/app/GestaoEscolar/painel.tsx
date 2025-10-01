@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,31 @@ import {
   Pressable,
   Animated,
   Easing,
+  Alert,
 } from 'react-native';
+import { BackHandler } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Route, Plus, Bell, BarChart3 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
 const AdminPanel = () => {
   const router = useRouter();
+   
+useEffect(() => {
+    const backAction = () => {
+      // Aqui você pode até mostrar um alerta se quiser
+      return true; // true = bloqueia o botão voltar
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove(); // remove ao desmontar
+  }, []);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [animation] = useState(new Animated.Value(0));
 
@@ -65,12 +82,34 @@ const AdminPanel = () => {
     closeSidebar();
   };
 
-  const logout = () => {
-    if (confirm('Deseja sair do sistema?')) {
-      alert('Logout realizado!');
-      closeSidebar();
-    }
-  };
+  const logout = async () => {
+  Alert.alert(
+    "Confirmação",
+    "Deseja sair do sistema?",
+    [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // limpa dados de autenticação (se houver)
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('usuario'); 
+            
+            // fecha sidebar
+            closeSidebar();
+
+            // redireciona para tela de login
+            router.replace("/"); // "/" aponta para index.tsx (login)
+          } catch (error) {
+            console.log("Erro ao deslogar:", error);
+          }
+        }
+      }
+    ]
+  );
+};
 
   const closeSidebar = () => {
     Animated.timing(animation, {

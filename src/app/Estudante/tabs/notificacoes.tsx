@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react"; 
+import { BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   View,
@@ -187,6 +188,21 @@ export default function NotificationsScreen() {
   const [filter, setFilter] = useState("Todos");
 
   const [usuarioId, setUsuarioId] = useState<number | null>(null);
+
+   // 🔒 Bloqueia botão voltar do Android
+  useEffect(() => {
+    const backAction = () => {
+      // true = impede ação de voltar
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   useEffect(() => {
     const loadUserId = async () => {

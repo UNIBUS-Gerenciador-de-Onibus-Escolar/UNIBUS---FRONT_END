@@ -1,12 +1,46 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch ,BackHandler, Alert} from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function Configuracoes() {
   const [notificacoesAtivas, setNotificacoesAtivas] = useState(true);
   const [idioma, setIdioma] = useState('Português');
+  const router = useRouter();
+
+  // Bloquear botão físico de voltar
+  useEffect(() => {
+    const backAction = () => {
+      return true; // bloqueia o back
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  // Função de logout
+  const handleLogout = () => {
+    Alert.alert(
+      "Sair",
+      "Deseja realmente sair da sua conta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: () => {
+            router.replace("/"); // volta para tela de login (index.tsx)
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -60,7 +94,7 @@ export default function Configuracoes() {
       </View>
 
       {/* Sair */}
-      <TouchableOpacity style={[styles.option, { marginTop: 20 }]} onPress={() => alert('Sair')}>
+      <TouchableOpacity style={[styles.option, { marginTop: 20 }]} onPress={handleLogout}>
         <Ionicons name="exit-outline" size={22} color="#d00" />
         <Text style={[styles.optionText, { color: '#d00' }]}>Sair</Text>
       </TouchableOpacity>

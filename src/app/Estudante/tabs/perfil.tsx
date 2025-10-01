@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert, StyleSheet, BackHandler } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -15,6 +15,21 @@ export default function Perfil() {
       { id: '2', rota: 'Centro', motorista: 'Fernando Souza' },
     ],
   });
+
+   // 🔒 Bloqueia botão voltar do Android
+  useEffect(() => {
+    const backAction = () => {
+      // true = impede ação de voltar
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   const [hasGalleryPermission, setHasGalleryPermission] = useState<boolean | null>(null);
 

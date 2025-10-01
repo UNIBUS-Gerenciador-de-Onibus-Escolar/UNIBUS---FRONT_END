@@ -1,10 +1,12 @@
-import React from "react";
+
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  BackHandler ,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -56,6 +58,20 @@ const avisos: Aviso[] = [
 ];
 
 export default function AvisosScreen() {
+   // 🔒 Bloqueia botão voltar do Android
+  useEffect(() => {
+    const backAction = () => {
+      // true = impede ação de voltar
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
   return (
     <View style={styles.container}>
       {/* Header */}

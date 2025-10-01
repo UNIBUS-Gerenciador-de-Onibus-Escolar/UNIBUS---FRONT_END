@@ -1,7 +1,22 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, BackHandler  } from "react-native";
+import React, { useState, useEffect} from "react";
 
 export default function PerfilScreen() {
+   // 🔒 Bloqueia botão voltar do Android
+  useEffect(() => {
+    const backAction = () => {
+      // true = impede ação de voltar
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+  
   return (
     <View style={styles.container}>
       <Image

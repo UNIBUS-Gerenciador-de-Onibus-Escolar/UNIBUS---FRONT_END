@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,12 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { API_URL } from "../../BackEnd/IPconfig";
+import { useRouter } from 'expo-router';
 
 // IMPORTANDO A NOVA TELA
 import MotoristaAvisosScreen from "./motoristaAviso"; // ajuste o caminho conforme a pasta
@@ -168,8 +170,33 @@ function PerfilScreen() {
 }
 
 function ConfigScreen() {
+   const router = useRouter(); // Adiciona o hook useRouter
+      // Função de logout
+    const handleLogout = () => {
+      Alert.alert(
+        "Sair",
+        "Deseja realmente sair da sua conta?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Sair",
+            style: "destructive",
+            onPress: () => {
+              router.replace("/"); // volta para tela de login (index.tsx)
+            }
+          }
+        ]
+      );
+    };
   return (
     <View style={styles.center}>
+      <TouchableOpacity 
+                style={[styles.option, { marginTop: 20 }]} 
+                onPress={handleLogout}
+              >
+                <Ionicons name="exit-outline" size={22} color="#d00" />
+                <Text style={[styles.optionText, { color: '#d00' }]}>Sair</Text>
+              </TouchableOpacity>
       <Text style={styles.text}>Tela Configurações</Text>
     </View>
   );
@@ -230,6 +257,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 10,
   },
+  optionText: { fontSize: 16},
   headerTitle: { fontSize: 18, fontWeight: "bold", marginLeft: 10 },
   motorista: { marginLeft: 16, marginVertical: 8, color: "#333" },
   section: {
@@ -274,6 +302,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 5,
   },
+  option:{},
   pontoText: { fontSize: 14, fontWeight: "500", flexShrink: 1 },
   horarioBox: {
     backgroundColor: "#FFD700",
