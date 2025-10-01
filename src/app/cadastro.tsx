@@ -1,9 +1,15 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Index() {
   return (
     <View style={styles.container}>
+      {/* Botão voltar no canto superior esquerdo */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.7}>
+        <Ionicons name="arrow-back" size={28} color="#000" />
+      </TouchableOpacity>
+
       <View style={styles.containerLogo}>
         {/* Logo do app */}
         <Image
@@ -63,6 +69,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffffff',
     alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
   },
   containerLogo: {
     flex: 1,

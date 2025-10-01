@@ -96,53 +96,200 @@ const MotoristaCadastro = () => {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-    >
-      <TouchableOpacity style={styles.voltar} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="#333" />
-      </TouchableOpacity>
+    <View style={{ flex: 1, backgroundColor: "#ffffffff" }}>
+      {/* Header amarelo grudado no topo e nas laterais */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.voltar} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={28} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.tituloHeader}>Cadastro de Motorista</Text>
+      </View>
 
-      <Text style={styles.titulo}>Cadastro de Motorista</Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <TouchableOpacity style={styles.fotoWrapper} onPress={handleSelecionarFoto}>
+          {fotoPerfil ? (
+            <Image source={{ uri: fotoPerfil }} style={styles.foto} />
+          ) : (
+            <View style={styles.fotoPlaceholder}>
+              <Ionicons name="camera" size={36} color="#888" />
+              <Text style={styles.fotoTexto}>Adicionar Foto</Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.fotoWrapper} onPress={handleSelecionarFoto}>
-        {fotoPerfil ? (
-          <Image source={{ uri: fotoPerfil }} style={styles.foto} />
-        ) : (
-          <View style={styles.fotoPlaceholder}>
-            <Ionicons name="camera" size={36} color="#888" />
-            <Text style={styles.fotoTexto}>Adicionar Foto</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+        <View style={styles.inputWrapper}>
+          <Ionicons name="person" size={22} color="#555" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Nome completo"
+            value={nomeCompleto}
+            onChangeText={setNomeCompleto}
+          />
+        </View>
 
-      <TextInput style={styles.input} placeholder="Nome completo" value={nomeCompleto} onChangeText={setNomeCompleto} />
-      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-      <TextInput style={styles.input} placeholder="Telefone" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
-      <TextInput style={styles.input} placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
-      <TextInput style={styles.input} placeholder="Número da CNH" value={cnh} onChangeText={setCnh} />
-      <TextInput style={styles.input} placeholder="Placa do ônibus" value={placaOnibus} onChangeText={(text) => setPlacaOnibus(text.toUpperCase())} />
-      <TextInput style={styles.input} placeholder="Rota" value={rota} onChangeText={setRota} />
+        <View style={styles.inputWrapper}>
+          <Ionicons name="mail" size={22} color="#555" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
 
-      <TouchableOpacity style={[styles.botao, loading && { backgroundColor: "#ccc" }]} onPress={handleCadastro} disabled={loading}>
-        {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.textoBotao}>Cadastrar</Text>}
-      </TouchableOpacity>
-    </ScrollView>
+        <View style={styles.inputWrapper}>
+          <Ionicons name="call" size={22} color="#555" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Telefone"
+            value={telefone}
+            onChangeText={setTelefone}
+            keyboardType="phone-pad"
+          />
+        </View>
+
+        <View style={styles.inputWrapper}>
+          <Ionicons name="lock-closed" size={22} color="#555" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry
+          />
+        </View>
+
+        <View style={styles.inputWrapper}>
+          <Ionicons name="card" size={22} color="#555" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Número da CNH"
+            value={cnh}
+            onChangeText={setCnh}
+          />
+        </View>
+
+        <View style={styles.inputWrapper}>
+          <Ionicons name="bus" size={22} color="#555" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Placa do ônibus"
+            value={placaOnibus}
+            onChangeText={(text) => setPlacaOnibus(text.toUpperCase())}
+          />
+        </View>
+
+        <View style={styles.inputWrapper}>
+          <Ionicons name="map" size={22} color="#555" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Rota"
+            value={rota}
+            onChangeText={setRota}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.botao, loading && { backgroundColor: "#ccc" }]}
+          onPress={handleCadastro}
+          disabled={loading}
+        >
+          {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.textoBotao}>Cadastrar</Text>}
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, paddingTop: 60, paddingHorizontal: 30, paddingBottom: 40, backgroundColor: "#FFF8E7" },
-  voltar: { position: "absolute", top: 40, left: 20 },
-  titulo: { fontSize: 26, fontWeight: "bold", marginBottom: 25, color: "#222", alignSelf: "center" },
-  fotoWrapper: { alignSelf: "center", marginBottom: 25 },
-  foto: { width: 120, height: 120, borderRadius: 60 },
-  fotoPlaceholder: { width: 120, height: 120, borderRadius: 60, backgroundColor: "#EEE", justifyContent: "center", alignItems: "center" },
-  fotoTexto: { marginTop: 5, color: "#888", fontSize: 12 },
-  input: { height: 50, borderWidth: 1, borderColor: "#CCC", borderRadius: 10, paddingHorizontal: 15, marginBottom: 15, backgroundColor: "#FFF" },
-  botao: { height: 50, backgroundColor: "#FFB700", justifyContent: "center", alignItems: "center", borderRadius: 10, marginTop: 10 },
-  textoBotao: { color: "#000", fontSize: 16, fontWeight: "bold" },
+  header: {
+    backgroundColor: "#ffc400ff",
+    paddingTop: 90,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    // grudado no topo e laterais
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  voltar: {
+    marginRight: 12,
+  },
+  tituloHeader: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  container: {
+    paddingTop: 120, // para não ficar atrás do header fixo
+    paddingHorizontal: 30,
+    paddingBottom: 40,
+    backgroundColor: "#ffffffff",
+  },
+  fotoWrapper: {
+    marginTop: 70,
+    alignSelf: "center",
+    marginBottom: 25,
+  },
+  foto: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
+  fotoPlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#EEE",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fotoTexto: {
+    marginTop: 5,
+    color: "#888",
+    fontSize: 12,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFB700", // borda amarela
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    backgroundColor: "#FFF",
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: "#000",
+  },
+  botao: {
+    height: 50,
+    backgroundColor: "#FFB700",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  textoBotao: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
 
 export default MotoristaCadastro;

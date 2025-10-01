@@ -149,12 +149,20 @@ const CadastroGestao = () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, padding: 30, backgroundColor: "#ffffffff" }}
+        contentContainerStyle={{ flexGrow: 1,  backgroundColor: "#ffffffff" }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ flex: 1 , marginTop: 70}}>
-          <Text style={styles.titulo}>Cadastro da Gestão Escolar</Text>
+        <View style={{ flex: 1 }}>
+          {/* Header com botão voltar */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.7}>
+              <Ionicons name="arrow-back" size={28} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Cadastro da Gestão Escolar</Text>
+          </View>
+
+          <View style={styles.Main}>
 
           {renderInput("Nome da Escola *", nomeEscola, setNomeEscola, "nomeEscola", <MaterialCommunityIcons name="school" size={22} color="#555" />)}
           {renderInput("Endereço *", endereco, setEndereco, "endereco", <Ionicons name="location-sharp" size={22} color="#555" />)}
@@ -175,18 +183,55 @@ const CadastroGestao = () => {
             {loading ? <ActivityIndicator color="#000" /> : <Text style={styles.textoBotao}>Cadastrar</Text>}
           </TouchableOpacity>
         </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffc400ff",
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  Main: {
+    padding: 26,
+  },
+  backButton: {
+    marginRight: 12,
+    marginTop: 60,
+  },
+  headerTitle: {
+    marginTop: 60,
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000",
+  },
   titulo: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center", color: "#333" },
   label: { fontSize: 14, fontWeight: "600", marginBottom: 5, color: "#444" },
-  inputContainer: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#CCC", borderRadius: 10, paddingHorizontal: 10, backgroundColor: "#FFF" },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFB700", // borda amarela
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#FFF",
+  },
   input: { flex: 1, height: 50 },
   error: { color: "red", fontSize: 12, marginTop: 4 },
-  botao: { height: 50, backgroundColor: "#FFB700", justifyContent: "center", alignItems: "center", borderRadius: 10, marginTop: 20 },
+  botao: {
+    height: 50,
+    backgroundColor: "#FFB700",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    marginTop: 20,
+  },
   textoBotao: { color: "#000", fontSize: 16, fontWeight: "bold" },
 });
 
