@@ -20,10 +20,10 @@ app.register_blueprint(rotas_bp, url_prefix="/api/rotas")
 app.register_blueprint(inscricoes_bp, url_prefix="/inscricaoEstudante")
 app.register_blueprint(motoristas_bp, url_prefix="/api/motoristas")  # motoristas
 app.register_blueprint(notificacoes_bp, url_prefix="/api/notificacoes")
-<<<<<<< HEAD
-=======
 app.register_blueprint(gestao_bp, url_prefix="/api/gestao")
+
 # Rota de teste
+@app.route("/")
 def index():
     return "API do TCC Unibus funcionando!"
 

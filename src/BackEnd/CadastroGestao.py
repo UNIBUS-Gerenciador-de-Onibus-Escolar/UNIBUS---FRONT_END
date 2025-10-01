@@ -10,7 +10,7 @@ def conectar():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="051526",
+        password="neto2007",
         database="UNIBUS"
     )
 
@@ -27,16 +27,18 @@ def cadastrar_gestao():
 
         cursor.execute("""
             INSERT INTO gestao (
-                nome_escola, endereco, contato_escola,
-                nome_gestor, cargo, email, telefone_gestor, senha
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                nome_escola, endereco, latitude, longitude, contato_escola,
+                nome_gestor, cargo, email_gestor, telefone_gestor, senha
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (
             data.get("nome_escola"),
             data.get("endereco"),
+            data.get("latitude"),
+            data.get("longitude"),
             data.get("contato_escola") or "",
             data.get("nome_gestor"),
             data.get("cargo") or "",
-            data.get("email"),
+            data.get("email_gestor"),
             data.get("telefone_gestor") or "",
             senha_hash
         ))
@@ -73,7 +75,8 @@ def login_gestao():
     try:
         conn = conectar()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM gestao WHERE email=%s", (email,))
+        # Alteração aqui: coluna correta no banco
+        cursor.execute("SELECT * FROM gestao WHERE email_gestor=%s", (email,))
         gestao = cursor.fetchone()
 
         if gestao and check_password_hash(gestao["senha"], senha):
@@ -87,6 +90,7 @@ def login_gestao():
     finally:
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
+
 
 # =====================================================
 # Listar gestões
